@@ -15,8 +15,10 @@ TODO
 ### Metagenomic datasets
 
 #### Simulated dataset
-With the [M3S3 tool](http://medweb.bgu.ac.il/m3s3/), a simulation sample was obtained made up of the Zymobiomics microbial community standasrd species of bacteria and yeast. The sample has the following composition:
-
+With the [M3S3 tool](http://medweb.bgu.ac.il/m3s3/), a simulation sample was obtained made up of the Zymobiomics microbial community standasrd species of bacteria and yeast. The sample has the following composition (obtained with Kraken2 with the minimkaken2_V1 database):
+<p align="center">
+  <img width="100" src="figures/ZymoBIOMICS_std_report.kraken2.bracken2.pie.png" alt="zymos_zimulated_kraken2"/>
+</p>
 
 #### Zymos community Standard
 Two commercially available mock communities containing 10 microbial species (ZymoBIOMICS Microbial Community Standards) were sequences by [Nicholls et al. 2019](https://academic.oup.com/gigascience/article/8/5/giz043/5486468). Shotgun sequencing of the Even and Log communities was performed with the same protocol, with the exception that the Log community was sequenced individually on 2 flowcell lanes and the Even community was instead sequenced on an Illumina MiSeq using 2×151 bp (paired-end) sequencing. They are available under accession numbers [ERR2984773](https://www.ebi.ac.uk/ena/data/view/ERR2984773) (even) and [ERR2935805](https://www.ebi.ac.uk/ena/data/view/ERR2935805).
