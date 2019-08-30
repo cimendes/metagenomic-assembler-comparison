@@ -17,7 +17,7 @@ TODO
 #### Simulated dataset
 With the [M3S3 tool](http://medweb.bgu.ac.il/m3s3/), a simulation sample was obtained made up of the Zymobiomics microbial community standasrd species of bacteria and yeast. The sample has the following composition (obtained with Kraken2 with the minimkaken2_V1 database):
 <p align="center">
-  <img width="200" src="figures/ZymoBIOMICS_std_report.kraken2.bracken2.pie.png" alt="zymos_zimulated_kraken2"/>
+  <img width="360" src="figures/ZymoBIOMICS_std_report.kraken2.bracken2.pie.png" alt="zymos_zimulated_kraken2"/>
 </p>
 
 #### Zymos community Standard
