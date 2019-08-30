@@ -14,6 +14,16 @@ TODO
 
 ### Metagenomic datasets
 
+#### Simulated dataset
+With the [M3S3 tool](http://medweb.bgu.ac.il/m3s3/), a simulation sample was obtained made up of the Zymobiomics microbial community standasrd species of bacteria and yeast. The sample has the following composition:
+
+
+#### Zymos community Standard
+Two commercially available mock communities containing 10 microbial species (ZymoBIOMICS Microbial Community Standards) were sequences by [Nicholls et al. 2019](https://academic.oup.com/gigascience/article/8/5/giz043/5486468). Shotgun sequencing of the Even and Log communities was performed with the same protocol, with the exception that the Log community was sequenced individually on 2 flowcell lanes and the Even community was instead sequenced on an Illumina MiSeq using 2×151 bp (paired-end) sequencing. They are available under accession numbers [ERR2984773](https://www.ebi.ac.uk/ena/data/view/ERR2984773) (even) and [ERR2935805](https://www.ebi.ac.uk/ena/data/view/ERR2935805).
+
+#### Real dataset
+As a real metagenomic dataset, the three CAMI synthetic metagenome challenge sets was used (Low (L), Medium with differential abundance (M), and High complexity with time series (H)). These datasets are publicly available in [GigaDB](http://gigadb.org/dataset/100344). 
+
 ### Assembly softwares and commands
 
 I've followed the following [metagenomic assembly tools table](https://academic.oup.com/view-large/131667617), published by [Ayling et al. 2019](https://academic.oup.com/bib/advance-article/doi/10.1093/bib/bbz020/5363831), as base for selecting metagenomic software to bee tested. In total 17 tools are presented. [IVA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4495290/) and [SAVAGE](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5411778/) were removed as they were aimed at viruses, as well as [Genovo](https://www.liebertpub.com/doi/abs/10.1089/cmb.2010.0244?rfr_dat=cr_pub%3Dpubmed&url_ver=Z39.88-2003&rfr_id=ori%3Arid%3Acrossref.org&journalCode=cmb) and [MAP](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/bts162) due to inavilability of software, [VICUNA](https://www.broadinstitute.org/viral-genomics/viral-genomics-analysis-software-registration) due to requiring registeration, [Omega](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btu395) as it was an assembly pipeline, abd [BBAP](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5406902/), [MetaVelvet](http://metavelvet.dna.bio.keio.ac.jp/), [MEtaVelvet-SL](http://metavelvet.dna.bio.keio.ac.jp/MSL.html), [PRICE](http://derisilab.ucsf.edu/software/price/) and [Ray Meta](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2012-13-12-r122) due to no update sinde 2016. The following tools will be tested:
