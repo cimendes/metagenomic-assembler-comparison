@@ -7,7 +7,7 @@ RUN  apt-get update && apt-get -y install git \
     make \
     ant \
     zlib1g \
-    python2
+    python
 
 RUN apt-get -y install openjdk-8-jdk
 
