@@ -67,11 +67,9 @@ def main():
 
     contigs, size, n50 = get_assembly_stats(assembly_filename, total_length)
 
-
-    result = [short_read_filename, header_str,
-          f'{mean(contiguity_all):.7f}', f'{mean(identity_all):.7f}', f'{mean(lowest_identiy_all):.7f}', f'{mean(coverage_all):.7f}',
-          f'{contigs}', f'{size:.7f}', f'{n50:.7f}']
-    print('\t'.join(["name", "contiguity","identity", "lowest_identity", "coverage", "n contigs", "size", "n50"]))
+    result = [short_read_filename, f'{mean(contiguity_all):.7f}', f'{mean(identity_all):.7f}',
+              f'{min(lowest_identiy_all):.7f}', f'{mean(coverage_all):.7f}', f'{contigs}', f'{size:.7f}', f'{n50:.7f}']
+    print('\t'.join(["name", "mean contiguity"," mean identity", " lowest identity", "mean coverage", "n contigs", "size", "n50"]))
     print('\t'.join(result))
 
 
@@ -134,7 +132,7 @@ def get_expanded_cigar(cigar):
 def get_assembly_stats(assembly_filename, ref_length):
     contig_lengths = sorted(get_contig_lengths(assembly_filename), reverse=True)
     total_length = sum(contig_lengths)
-    target_length = total_length * 0.5
+    target_length = total_length * 0.5 # why?
     length_so_far = 0
     n50 = 0
     for contig_length in contig_lengths:
