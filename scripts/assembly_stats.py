@@ -12,8 +12,6 @@ It outputs lots of information about the read set and the assembly. Run it
 with no arguments to get the header line.
 """
 
-import dateutil.parser
-import gzip
 import re
 import sys
 
@@ -213,20 +211,9 @@ def get_assembly_stats(assembly_filename, ref_length):
     return len(contig_lengths), total_length / ref_length, n50 / ref_length
 
 
-def get_assembly_time(assembly_filename):
-    time_filename = assembly_filename.replace('.fasta.gz', '.time')
-    times = []
-    with open(time_filename, 'rt') as time_file:
-        for line in time_file:
-            times.append(dateutil.parser.parse(line.strip()))
-    assert len(times) == 2
-    elapsed_time = times[1] - times[0]
-    return elapsed_time.seconds / 60.0
-
-
 def get_contig_lengths(filename):
     lengths = []
-    with gzip.open(filename, 'rt') as fasta_file:
+    with open(filename, 'rt') as fasta_file:
         name = ''
         sequence = ''
         for line in fasta_file:
