@@ -61,3 +61,26 @@ Last update: 11/10/2018 (release) and 24/04/2019 (GitHub)
 Like Snowball and MegaGTA, Xander employs HMM profile model to perform a guided assebly targeting specific genes. These are used to create a novel combined weighted assembly graph. Xander performs both assembly and annotation concomitantly using information incorporated in this graph. It was published by [Wang et al. 2015](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6) and it's available at https://github.com/rdpstaff/Xander_assembler.
 Last update: 27/10/2017 (GitHub)
  
+ 
+ ### Assessing Metagenomic Assembly Success
+ 
+ #### Assembly Continuity 
+ 
+ [Rick et al. 2019](https://github.com/rrwick/Long-read-assembler-comparison) proposed the use of a triple reference to assess chromosome contiguity while benchmaking long-read
+genomic assemblers. This measure is the longest single alignment between the assembly and the reference. 
+Therefore, in terms of the reference length:
+
+* Contiguity is 100% if the assembly went perfectly.
+* Contiguity slightly less than 100% (e.g. 99.99%) indicates that the assembly was complete, but some bases were lost at the start/end of the circular chromosome.
+* Contiguity more than 100% (e.g. 102%) indicates that the assembly contains duplicated sequence via a start-end overlap.
+* Much lower contiguity (e.g. 70%) indicate that the assembly was not complete, either due to fragmentation or misassembly.
+
+More information is available on [Rick's Assembly Benchmark GitHub page](https://github.com/rrwick/Long-read-assembler-comparison#assessing-chromosome-contiguity)
+
+For each reference in the Zymos community standard, we've generated a chromosomal triple reference and mapped each 
+metagenomic assembly with the command:
+
+`minimap2 -c -t 16 -r 10000 -g 10000 -x asm20 --eqx ${reference} ${sample}_contigs.fa > ${sample}_${reference}.paf`
+
+Because each metagenomic sample is composed by more than one genome, this process was repeated for all reference genomes
+ present in the sample.
