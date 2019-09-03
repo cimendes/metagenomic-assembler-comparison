@@ -40,7 +40,7 @@ def main():
         ref_length = len(lines[1])/3
         assert ref_length != 0
 
-    short_read_filename = '/'.join(read_filename[0].split('/')[-2:])
+    short_read_filename = '/'.join(read_filename[0].split('/')[-2])
 
     contiguity, identity, lowest_window_identity, coverage = get_alignment_stats(paf_filename, ref_length)
     contigs, size, n50 = get_assembly_stats(assembly_filename, ref_length)
