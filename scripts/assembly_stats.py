@@ -17,18 +17,16 @@ import gzip
 import re
 import sys
 
-columns = ['read_filename', 'fragment_length_mean', 'fragment_length_stdev', 'fragment_length_n50',
-           'read_identity_mean', 'read_identity_max', 'read_identity_stdev',
+
+columns = ['read_filename', 'read_identity_mean', 'read_identity_max', 'read_identity_stdev',
            'contiguity', 'identity', 'lowest_window_identity', 'coverage',
-           'contigs', 'size', 'n50',
-           'minutes']
+           'contigs', 'size', 'n50']
 
 
 def main():
     try:
         assembly_filename = sys.argv[1]
         read_filename = [sys.argv[2], sys.argv[3]]
-        read_log = read_filename[0].replace('_1.fq.gz', '.log')
         paf_filename = sys.argv[4]
         ref_sequence = sys.argv[5]
 
@@ -45,18 +43,13 @@ def main():
         assert ref_length != 0
 
     short_read_filename = '/'.join(read_filename[0].split('/')[-2:])
-    fragment_length_mean, fragment_length_stdev, fragment_length_n50 = get_fragment_length(read_log)
-    read_identity_mean, read_identity_max, read_identity_stdev = get_read_identity(read_log)
+
     contiguity, identity, lowest_window_identity, coverage = get_alignment_stats(paf_filename, ref_length)
     contigs, size, n50 = get_assembly_stats(assembly_filename, ref_length)
-    minutes = get_assembly_time(assembly_filename)
 
     result = [short_read_filename,
-              f'{fragment_length_mean}', f'{fragment_length_stdev}', f'{fragment_length_n50}',
-              f'{read_identity_mean}', f'{read_identity_max}', f'{read_identity_stdev}',
               f'{contiguity:.7f}', f'{identity:.7f}', f'{lowest_window_identity:.7f}', f'{coverage:.7f}',
-              f'{contigs}', f'{size:.7f}', f'{n50:.7f}',
-              f'{minutes:.2f}']
+              f'{contigs}', f'{size:.7f}', f'{n50:.7f}']
     print('\t'.join(result))
 
 
