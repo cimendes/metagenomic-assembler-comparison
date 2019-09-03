@@ -41,6 +41,7 @@ def main():
         assert ref_length != 0
 
     short_read_filename = read_filename[0].split('/')[2:]
+    print(short_read_filename)
 
     contiguity, identity, lowest_window_identity, coverage = get_alignment_stats(paf_filename, ref_length)
     contigs, size, n50 = get_assembly_stats(assembly_filename, ref_length)
@@ -48,8 +49,6 @@ def main():
     result = [short_read_filename,
               f'{contiguity:.7f}', f'{identity:.7f}', f'{lowest_window_identity:.7f}', f'{coverage:.7f}',
               f'{contigs}', f'{size:.7f}', f'{n50:.7f}']
-
-    print('\t'.join(columns))
     print('\t'.join(result))
 
 
