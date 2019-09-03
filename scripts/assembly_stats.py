@@ -14,10 +14,11 @@ with no arguments to get the header line.
 
 import re
 import sys
+from itertools import groupby
+from statistics import mean
 
 
-columns = ['read_filename', 'read_identity_mean', 'read_identity_max', 'read_identity_stdev',
-           'contiguity', 'identity', 'lowest_window_identity', 'coverage',
+columns = ['contiguity', 'identity', 'lowest_window_identity', 'coverage',
            'contigs', 'size', 'n50']
 
 
@@ -35,23 +36,47 @@ def main():
 
     ref_length = 0
 
-    with open(ref_sequence, "r") as ref_sequence:
-        lines = ref_sequence.readlines()
-        ref_length = len(lines[1])/3
-        assert ref_length != 0
+    # with open(ref_sequence, "r") as ref_sequence:
+    #     lines = ref_sequence.readlines()
+    #     ref_length = len(lines[1])/3
+    #     assert ref_length != 0
 
     short_read_filename = read_filename[0].split('/')[-1].replace("_1.fq.gz", "")
 
-    contiguity, identity, lowest_window_identity, coverage = get_alignment_stats(paf_filename, ref_length)
-    contigs, size, n50 = get_assembly_stats(assembly_filename, ref_length)
+    fh_reference = open(ref_sequence, "r")
 
-    result = [short_read_filename,
-              f'{contiguity:.7f}', f'{identity:.7f}', f'{lowest_window_identity:.7f}', f'{coverage:.7f}',
-              f'{contigs}', f'{size:.7f}', f'{n50:.7f}']
+    entry = (x[1] for x in groupby(fh_reference, lambda line: line[0] == ">"))
+
+    # get stats per reference
+    total_length = 0
+    contiguity_all = []
+    identity_all = []
+    lowest_identiy_all = []
+    coverage_all = []
+
+    for header in entry:
+        header_str = header.__next__()[1:].strip().split()[0]
+        seq = "".join(s.strip() for s in entry.__next__())
+        total_length += len(seq)/3
+        contiguity, identity, lowest_window_identity, coverage = get_alignment_stats(paf_filename, header_str, len(seq)/3)
+        print(header_str, contiguity, identity, lowest_window_identity, coverage)
+        contiguity_all.append(contiguity)
+        identity_all.append(identity)
+        lowest_identiy_all.append(lowest_window_identity)
+        coverage_all.append(coverage)
+
+    contigs, size, n50 = get_assembly_stats(assembly_filename, total_length)
+
+
+    result = [short_read_filename, header_str,
+          f'{mean(contiguity_all):.7f}', f'{mean(identity_all):.7f}', f'{mean(lowest_identiy_all):.7f}', f'{mean(coverage_all):.7f}',
+          f'{contigs}', f'{size:.7f}', f'{n50:.7f}']
+    print('\t'.join(["name", "contiguity","identity", "lowest_identity", "coverage", "n contigs", "size", "n50"]))
     print('\t'.join(result))
 
 
-def get_alignment_stats(paf_filename, ref_length):
+def get_alignment_stats(paf_filename, ref_name, ref_length):
+
     # Tracks the longest single alignment, in terms of the reference bases. This can
     # exceed 100% in the case of overlapping ends.
     longest_alignment = 0
@@ -64,16 +89,17 @@ def get_alignment_stats(paf_filename, ref_length):
     with open(paf_filename) as paf:
         for line in paf:
             parts = line.strip().split('\t')
-            start, end = int(parts[7]), int(parts[8])
-            matching_bases, total_bases = int(parts[9]), int(parts[10])
-            cigar = [x for x in parts if x.startswith('cg:Z:')][0][5:]
-            if end - start > longest_alignment:
-                longest_alignment = end - start
-                longest_alignment_id = matching_bases / total_bases
-                longest_alignment_cigar = cigar
-            longest_alignment = max(longest_alignment, end - start)
-            for i in range(start, end):
-                covered_bases.add(i % ref_length)
+            if parts[5] == ref_name:
+                start, end = int(parts[7]), int(parts[8])
+                matching_bases, total_bases = int(parts[9]), int(parts[10])
+                cigar = [x for x in parts if x.startswith('cg:Z:')][0][5:]
+                if end - start > longest_alignment:
+                    longest_alignment = end - start
+                    longest_alignment_id = matching_bases / total_bases
+                    longest_alignment_cigar = cigar
+                longest_alignment = max(longest_alignment, end - start)
+                for i in range(start, end):
+                    covered_bases.add(i % ref_length)
 
     relative_longest_alignment = longest_alignment / ref_length
     coverage = len(covered_bases) / ref_length
@@ -103,98 +129,6 @@ def get_expanded_cigar(cigar):
         letter = cigar_part[-1]
         expanded_cigar.append(letter * num)
     return ''.join(expanded_cigar)
-
-
-def get_glitch_levels(read_log):
-    glitch_rate, glitch_size, glitch_skip = None, None, None
-    with open(read_log, 'rt') as log:
-        for line in log:
-            if 'Reads will have no glitches' in line:
-                return 0, 0, 0
-            if 'rate (mean distance between glitches)' in line:
-                glitch_rate = int(line.split('=')[-1].strip())
-            if 'size (mean length of random sequence)' in line:
-                glitch_size = float(line.split('=')[-1].strip())
-            if 'skip (mean sequence lost per glitch)' in line:
-                glitch_skip = float(line.split('=')[-1].strip())
-    assert glitch_rate is not None
-    assert glitch_size is not None
-    assert glitch_skip is not None
-    return glitch_rate, glitch_size, glitch_skip
-
-
-def get_other_problems(read_log):
-    chimera_rate, junk_rate, random_rate = 0.0, 0.0, 0.0
-    with open(read_log, 'rt') as log:
-        for line in log:
-            if 'chimera join rate:' in line:
-                chimera_rate = float(line.split(': ')[-1].split('%')[0].strip()) / 100
-            if 'junk read rate:' in line:
-                junk_rate = float(line.split(': ')[-1].split('%')[0].strip()) / 100
-            if 'random read rate:' in line:
-                random_rate = float(line.split(': ')[-1].split('%')[0].strip()) / 100
-    return chimera_rate, junk_rate, random_rate
-
-
-def get_adapter_lengths(read_log):
-    start_adapter_length, end_adapter_length = None, None
-    with open(read_log, 'rt') as log:
-        for line in log:
-            if 'Start adapter:' in line:
-                if 'Start adapter: none' in line:
-                    start_adapter_length = 0
-                else:
-                    line = next(log)
-                    assert 'seq:' in line
-                    line = line.replace(' (randomly generated)', '').strip()
-                    line = line.split('seq: ')[-1]
-                    start_adapter_length = len(line)
-            if 'End adapter:' in line:
-                if 'End adapter: none' in line:
-                    end_adapter_length = 0
-                else:
-                    line = next(log)
-                    assert 'seq:' in line
-                    line = line.replace(' (randomly generated)', '').strip()
-                    line = line.split('seq: ')[-1]
-                    end_adapter_length = len(line)
-    assert start_adapter_length is not None
-    assert end_adapter_length is not None
-    return start_adapter_length, end_adapter_length
-
-
-def get_fragment_length(read_log):
-    fragment_length_mean, fragment_length_stdev, fragment_length_n50 = None, None, None
-    with open(read_log, 'rt') as log:
-        for line in log:
-            if 'Generating fragment lengths from a gamma distribution:' in line:
-                mean_line = next(log)
-                stdev_line = next(log)
-                n50_line = next(log)
-                fragment_length_mean = int(mean_line.split('=')[1].split('bp')[0].strip())
-                fragment_length_stdev = int(stdev_line.split('=')[1].split('bp')[0].strip())
-                fragment_length_n50 = int(n50_line.split('=')[1].split('bp')[0].strip())
-    assert fragment_length_mean is not None
-    assert fragment_length_stdev is not None
-    assert fragment_length_n50 is not None
-    return fragment_length_mean, fragment_length_stdev, fragment_length_n50
-
-
-def get_read_identity(read_log):
-    read_identity_mean, read_identity_max, read_identity_stdev = None, None, None
-    with open(read_log, 'rt') as log:
-        for line in log:
-            if 'Generating read identities from a beta distribution:' in line:
-                mean_line = next(log)
-                max_line = next(log)
-                stdev_line = next(log)
-                read_identity_mean = float(mean_line.split('=')[1].split('%')[0].strip()) / 100.0
-                read_identity_max = float(max_line.split('=')[1].split('%')[0].strip()) / 100.0
-                read_identity_stdev = float(stdev_line.split('=')[1].split('%')[0].strip()) / 100.0
-    assert read_identity_mean is not None
-    assert read_identity_max is not None
-    assert read_identity_stdev is not None
-    return read_identity_mean, read_identity_max, read_identity_stdev
 
 
 def get_assembly_stats(assembly_filename, ref_length):
