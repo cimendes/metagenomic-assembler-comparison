@@ -27,7 +27,7 @@ columns = ['read_filename', 'fragment_length_mean', 'fragment_length_stdev', 'fr
 def main():
     try:
         assembly_filename = sys.argv[1]
-        read_filename = sys.argv[2, 3]
+        read_filename = list(sys.argv[2], sys.argv[3])
         read_log = read_filename[0].replace('_1.fq.gz', '.log')
         paf_filename = sys.argv[4]
         ref_sequence = sys.argv[5]
@@ -44,7 +44,7 @@ def main():
         ref_length = len(lines[1])/3
         assert ref_length != 0
 
-    short_read_filename = '/'.join(read_filename.split('/')[-2:])
+    short_read_filename = '/'.join(read_filename[0].split('/')[-2:])
     fragment_length_mean, fragment_length_stdev, fragment_length_n50 = get_fragment_length(read_log)
     read_identity_mean, read_identity_max, read_identity_stdev = get_read_identity(read_log)
     contiguity, identity, lowest_window_identity, coverage = get_alignment_stats(paf_filename, ref_length)
