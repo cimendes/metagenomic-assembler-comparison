@@ -45,6 +45,9 @@ MEGAHIT, published by [Li et al. 2015](https://academic.oup.com/bioinformatics/a
 The latest version is available at https://github.com/voutcn/megahit
 Last update: 12/08/2019 (GitHub)
 
+docker container: `cimendes/megahit-assembler:12.08.19-1`
+command: `megahit -1 read_1.fq.gz -2 read_2.fq.gz -o out -t 16`
+
 #### Snowball
 Published by [Gregot et al. 2016](https://academic.oup.com/bioinformatics/article/32/17/i649/2450756), Snowball is a novel strain aware gene assembler for shotgun metagenomic data that does not require closely related reference genomes to be available. Like MegaGTA and Xander, it uses profile hidden Markov models (HMMs) of gene domains of interest to guide the assembly. 
 The latest version is available at https://github.com/hzi-bifo/snowball
