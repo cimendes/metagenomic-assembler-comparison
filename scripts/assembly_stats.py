@@ -27,7 +27,7 @@ columns = ['read_filename', 'fragment_length_mean', 'fragment_length_stdev', 'fr
 def main():
     try:
         assembly_filename = sys.argv[1]
-        read_filename = list(sys.argv[2], sys.argv[3])
+        read_filename = [sys.argv[2], sys.argv[3]]
         read_log = read_filename[0].replace('_1.fq.gz', '.log')
         paf_filename = sys.argv[4]
         ref_sequence = sys.argv[5]
