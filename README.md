@@ -84,3 +84,15 @@ metagenomic assembly with the command:
 
 Because each metagenomic sample is composed by more than one genome, this process was repeated for all reference genomes
  present in the sample.
+
+## Authors
+
+* Inês Mendes 
+    * Instituto de Microbiologia, Instituto de Medicina Molecular, Faculdade de Medicina, Universidade de Lisboa, 
+    Lisboa, Portugal; 
+    * University of Groningen, University Medical Center Groningen, Department of Medical Microbiology and Infection 
+    Prevention, Groningen, The Netherlands
+
+* Yair Motro 
+    * Department of Health System Management, School of Public Health, Faculty of Health Sciences, Ben-Gurion 
+University of the Negev, Beer-Sheva, Israel.
