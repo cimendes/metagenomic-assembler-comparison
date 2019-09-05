@@ -51,7 +51,7 @@ def main():
         seq = "".join(s.strip() for s in entry.__next__())
         total_length += len(seq)/3
         contiguity, identity, lowest_window_identity, coverage = get_alignment_stats(paf_filename, header_str, len(seq)/3)
-        print('\t'.join([header_str, assembler, (round(contiguity, 7)), str(round(identity, 7)), str(round(lowest_window_identity, 7)), str(round(coverage, 7))]))
+        print('\t'.join([header_str, assembler, str(round(contiguity, 7)), str(round(identity, 7)), str(round(lowest_window_identity, 7)), str(round(coverage, 7))]))
         contiguity_all.append(contiguity)
         identity_all.append(identity)
         lowest_identiy_all.append(lowest_window_identity)
