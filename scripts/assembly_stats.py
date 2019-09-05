@@ -17,11 +17,6 @@ import sys
 from itertools import groupby
 from statistics import mean
 
-
-columns = ['contiguity', 'identity', 'lowest_window_identity', 'coverage',
-           'contigs', 'size', 'n50']
-
-
 def main():
     try:
         assembly_filename = sys.argv[1]
@@ -31,15 +26,11 @@ def main():
 
     # If no arguments were given, just print the header line.
     except IndexError:
-        print('\t'.join(columns))
+        print('\t'.join(["name", "contiguity", "identity", "lowest identity", "coverage"]))
+        print('\t'.join(
+            ["name", "mean contiguity", " mean identity", " lowest identity", "mean coverage", "n contigs", "size",
+             "n50"]), file=sys.stderr)
         sys.exit(0)
-
-    ref_length = 0
-
-    # with open(ref_sequence, "r") as ref_sequence:
-    #     lines = ref_sequence.readlines()
-    #     ref_length = len(lines[1])/3
-    #     assert ref_length != 0
 
     short_read_filename = read_filename[0].split('/')[-1].replace("_1.fq.gz", "")
 
@@ -59,7 +50,7 @@ def main():
         seq = "".join(s.strip() for s in entry.__next__())
         total_length += len(seq)/3
         contiguity, identity, lowest_window_identity, coverage = get_alignment_stats(paf_filename, header_str, len(seq)/3)
-        print(header_str, contiguity, identity, lowest_window_identity, coverage)
+        print('\t'.join([header_str, str(round(contiguity, 7)), str(round(identity, 7)), str(round(lowest_window_identity, 7)), str(round(coverage, 7))]))
         contiguity_all.append(contiguity)
         identity_all.append(identity)
         lowest_identiy_all.append(lowest_window_identity)
@@ -69,8 +60,8 @@ def main():
 
     result = [short_read_filename, f'{mean(contiguity_all):.7f}', f'{mean(identity_all):.7f}',
               f'{min(lowest_identiy_all):.7f}', f'{mean(coverage_all):.7f}', f'{contigs}', f'{size:.7f}', f'{n50:.7f}']
-    print('\t'.join(["name", "mean contiguity"," mean identity", " lowest identity", "mean coverage", "n contigs", "size", "n50"]))
-    print('\t'.join(result))
+
+    print('\t'.join(result), file=sys.stderr)
 
 
 def get_alignment_stats(paf_filename, ref_name, ref_length):

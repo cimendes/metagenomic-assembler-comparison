@@ -21,6 +21,9 @@ srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shi
 
 # MAPPING
 srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shifter --image=mcfonsecalab/minimap2:latest
-for file in $(ls /home/cimendes/Binning_assessment/metagenomic-assembler-comparison/data/references/ZymoBIOMICS.STD.refseq.v2/Genomes/*triple_chromosome.fasta); do minimap2 -c -t 16 -r 10000 -g 10000 -x asm20 --eqx $file out_ERR2935805/final.contigs.fa > ERR2935805_$(basename $file).paf; done
+minimap2 -c -t 16 -r 10000 -g 10000 -x asm20 --eqx $file out_ERR2935805/final.contigs.fa > ERR2935805_$(basename $file).paf; done
 for file in $(ls /home/cimendes/Binning_assessment/metagenomic-assembler-comparison/data/references/ZymoBIOMICS.STD.refseq.v2/Genomes/*triple_chromosome.fasta); do minimap2 -c -t 16 -r 10000 -g 10000 -x asm20 --eqx $file out_ERR298477/final.contigs.fa  > ERR298477_$(basename $file).paf; done
 
+
+srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shifter --image=cimendes/metaspades:11.10.2018-1
+metaspades.py -o out -1 mockSample_fwd_shuffled.fastq.gz -2 mockSample_rev_shuffled.fastq.gz --only-assembler -t 16 -m 32
