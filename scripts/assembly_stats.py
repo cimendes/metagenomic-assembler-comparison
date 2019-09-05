@@ -20,7 +20,7 @@ from statistics import mean
 def main():
     try:
         assembly_filename = sys.argv[1]
-        read_filename = [sys.argv[2], sys.argv[3]]
+        sample_name = sys.argv[2]
         paf_filename = sys.argv[4]
         ref_sequence = sys.argv[5]
         assembler = sys.argv[6]
@@ -32,8 +32,6 @@ def main():
             ["name", "assembler", "mean contiguity", " mean identity", " lowest identity", "mean coverage", "n contigs", "size",
              "n50"]), file=sys.stderr)
         sys.exit(0)
-
-    short_read_filename = read_filename[0].split('/')[-1].replace("_1.fq.gz", "")
 
     fh_reference = open(ref_sequence, "r")
 
@@ -59,7 +57,7 @@ def main():
 
     contigs, size, n50 = get_assembly_stats(assembly_filename, total_length)
 
-    result = [short_read_filename, assembler, f'{mean(contiguity_all):.7f}', f'{mean(identity_all):.7f}',
+    result = [sample_name, assembler, f'{mean(contiguity_all):.7f}', f'{mean(identity_all):.7f}',
               f'{min(lowest_identiy_all):.7f}', f'{mean(coverage_all):.7f}', f'{contigs}', f'{size:.7f}', f'{n50:.7f}']
 
     print('\t'.join(result), file=sys.stderr)
