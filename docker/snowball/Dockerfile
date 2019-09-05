@@ -26,7 +26,7 @@ RUN conda install python=2.7 biopython
 
 # DOWNLOAD Pfam profile HMMs
 RUN wget ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam30.0/Pfam-A.hmm.gz
-RUN tar xf Pfam-A.hmm.gz && rm Pfam-A.hmm.gz
+RUN gunzip Pfam-A.hmm.gz
 
 # INSTALL Snowball
 RUN git clone https://github.com/hzi-bifo/snowball.git
