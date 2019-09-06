@@ -27,3 +27,8 @@ for file in $(ls /home/cimendes/Binning_assessment/metagenomic-assembler-compari
 
 srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shifter --image=cimendes/metaspades:11.10.2018-1
 metaspades.py -o out -1 mockSample_fwd_shuffled.fastq.gz -2 mockSample_rev_shuffled.fastq.gz --only-assembler -t 16 -m 32
+
+
+srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shifter --image=cimendes/snowball:24.09.2017-1
+export PYTHONPATH=/NGStools/snowball:$PYTHONPATH
+python2 /NGStools/snowball/algbioi/ga/run.py -f mockSample_fwd_shuffled.fastq.gz -s mockSample_rev_shuffled.fastq.gz -m /NGStools/Pfam-A.hmm -o out.fna -a -p 16 -i 225
