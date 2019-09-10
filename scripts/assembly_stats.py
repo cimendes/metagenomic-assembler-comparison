@@ -156,7 +156,7 @@ def get_assembly_stats(assembly_filename):
         if length_so_far >= target_length:
             n50 = contig_length
             break
-    return len(contig_lengths), total_length, n50, max(contig_length), min(contig_length)
+    return len(contig_lengths), total_length, n50, max(contig_lengths), min(contig_lengths)
 
 
 def get_contig_lengths(filename):
