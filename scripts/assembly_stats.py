@@ -4,9 +4,10 @@ Adapted from https://raw.githubusercontent.com/rrwick/Long-read-assembler-compar
 
 This script takes the following arguments (in this order):
   * metagenomic assembly filename
-  * metagenomic reads filename
-  * alignment filenames to each sample in the metagenomic data
+  * sample name
+  * alignment filename to the triple reference in PAF format (minimap2)
   * triple reference genome file
+  * assembler name
 
 It outputs lots of information about the read set and the assembly. Run it
 with no arguments to get the header line.
@@ -47,8 +48,8 @@ def main():
     aligned_bp_all = []
 
     # print specific file header to stdout.
-    print('\t'.join(["reference", "contiguity", "identity", "lowest identity", "coverage", "NA50",
-                     "aligned contigs", "aligned bp"]))
+    print('\t'.join(["reference", "reference length", "contiguity", "identity", "lowest identity",
+                     "breadth of coverage", "NA50", "aligned contigs", "aligned bp"]))
 
     for header in entry:
 
@@ -58,7 +59,7 @@ def main():
         contiguity, identity, lowest_window_identity, coverage, na50, aligned_seq, aligned_bp = get_alignment_stats(
             paf_filename, header_str, len(seq)/3)
 
-        print('\t'.join([header_str, f'{contiguity:.4f}', f'{identity:.4f}', f'{lowest_window_identity:.4f}',
+        print('\t'.join([header_str, f'{len(seq)/3}', f'{contiguity:.4f}', f'{identity:.4f}', f'{lowest_window_identity:.4f}',
                          f'{coverage:.4f}', f'{na50}', f'{aligned_seq}', f'{aligned_bp}']))
 
         contiguity_all.append(contiguity)
@@ -69,11 +70,16 @@ def main():
         aligned_contigs_all.append(aligned_seq)
         aligned_bp_all.append(aligned_bp)
 
-    contigs, size, n50 = get_assembly_stats(assembly_filename)
+    contigs, size, n50, min_contig_len, max_contig_len = get_assembly_stats(assembly_filename)
 
-    result = [sample_name, assembler, f'{mean(contiguity_all):.4f}', f'{mean(identity_all):.4f}',
-              f'{min(lowest_identiy_all):.4f}', f'{mean(coverage_all):.4f}', f'{mean(na50_all):.4f}',
-              f'{mean(aligned_contigs_all):.4f}', f'{mean(aligned_bp_all):.4f}' f'{contigs}', f'{size}', f'{n50}']
+    print('\t'.join(
+        ["assembler", "mean contiguity", " mean identity", "mean breadth of coverage",
+         "mean NA50", "mean aligned contigs", "mean aligned bp", "contigs", "max contig length", "min contig lenght",
+         "size bp", "n50"]), file=sys.stderr)
+
+    result = [assembler, f'{mean(contiguity_all):.4f}', f'{mean(identity_all):.4f}',
+              f'{mean(coverage_all):.4f}', f'{mean(na50_all):.4f}', f'{mean(aligned_contigs_all):.4f}',
+              f'{mean(aligned_bp_all):.4f}' f'{contigs}', f'{max_contig_len}', f'{min_contig_len}', f'{size}', f'{n50}']
 
     print('\t'.join(result), file=sys.stderr)
 
@@ -150,7 +156,7 @@ def get_assembly_stats(assembly_filename):
         if length_so_far >= target_length:
             n50 = contig_length
             break
-    return len(contig_lengths), total_length, n50
+    return len(contig_lengths), total_length, n50, max(contig_length), min(contig_length)
 
 
 def get_contig_lengths(filename):
