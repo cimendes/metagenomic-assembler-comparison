@@ -202,23 +202,23 @@ For each assembly, the resulting PAF files are then analysed with the `contig_ch
 ### Simulated dataset
 
 <p align="center">
-  <img width="720" src="figures/MEGAHIT_table.png" alt="MEGAHIT_table"/>
+  <img width="800" src="figures/MEGAHIT_table.png" alt="MEGAHIT_table"/>
 </p>
 
 <p align="center">
-  <img width="720" src="figures/metaSPAdes_table.png" alt="metaSPAdes_table"/>
+  <img width="800" src="figures/metaSPAdes_table.png" alt="metaSPAdes_table"/>
 </p>
 
 <p align="center">
-  <img width="720" src="figures/SPAdes_table.png" alt="SPAdes_table"/>
+  <img width="800" src="figures/SPAdes_table.png" alt="SPAdes_table"/>
 </p>
 
 <p align="center">
-  <img width="720" src="figures/SKESA_table.png" alt="SKESA_table"/>
+  <img width="800" src="figures/SKESA_table.png" alt="SKESA_table"/>
 </p>
 
 <p align="center">
-  <img width="720" src="figures/all_assemblers_table.png" alt="all_assemblers_table"/>
+  <img width="800" src="figures/all_assemblers_table.png" alt="all_assemblers_table"/>
 </p>
 
 
