@@ -4,10 +4,14 @@
 # SLURM controller). It's not meant to be used, just for consultation purposes
 
 # IDBA
-srun --pty --nodes=1 --cpus-per-task=16 --mem-per-cpu=2 --tasks-per-node=1 shifter --image=cimendes/idba:31.12.2016-1
+srun --pty --nodes=1 --cpus-per-task=40 --mem-per-cpu=6 --tasks-per-node=1 shifter --image=cimendes/idba:31.12.2016-1
 # merge (uncompressed) reads and convert to fasta
 fq2fa --merge ERR2984773_1.fq ERR2984773_2.fq reads.fa
 idba_ud -l reads.fa --num_threads 16 -o out # -l reads longer than 128 nucleotides. sample had 150nt
+
+#bbtools
+reformat.sh in1=mockSample_fwd_shuffled.fastq.gz in2=mockSample_rev_shuffled.fastq.gz out=mockSample_reads.fasta
+idba_ud -l mockSample_reads.fasta --num_threads 40 -o out
 
 
 # MEGAHIT
@@ -20,15 +24,27 @@ srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shi
 
 
 # MAPPING
-srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shifter --image=mcfonsecalab/minimap2:latest
-minimap2 -c -t 16 -r 10000 -g 10000 -x asm20 --eqx $file out_ERR2935805/final.contigs.fa > ERR2935805_$(basename $file).paf; done
-for file in $(ls /home/cimendes/Binning_assessment/metagenomic-assembler-comparison/data/references/ZymoBIOMICS.STD.refseq.v2/Genomes/*triple_chromosome.fasta); do minimap2 -c -t 16 -r 10000 -g 10000 -x asm20 --eqx $file out_ERR298477/final.contigs.fa  > ERR298477_$(basename $file).paf; done
+srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shifter --image=cimendes/minimap2:2.17-1
+minimap2 -c -t 16 -r 10000 -g 10000 -x asm20 --eqx --secondary=no $file out_ERR2935805/final.contigs.fa > ERR2935805_$(basename $file).paf
 
 
 srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shifter --image=cimendes/metaspades:11.10.2018-1
-metaspades.py -o out -1 mockSample_fwd_shuffled.fastq.gz -2 mockSample_rev_shuffled.fastq.gz --only-assembler -t 16 -m 32
+metaspades.py -o out2 -1 mockSample_fwd_shuffled.fastq.gz -2 mockSample_rev_shuffled.fastq.gz --only-assembler -t 16 -m 32
 
 
 srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shifter --image=cimendes/snowball:24.09.2017-1
 export PYTHONPATH=/NGStools/snowball:$PYTHONPATH
 python2 /NGStools/snowball/algbioi/ga/run.py -f mockSample_fwd_shuffled.fastq.gz -s mockSample_rev_shuffled.fastq.gz -m /NGStools/Pfam-A.hmm -o out.fna -a -p 16 -i 225
+
+
+# SKESA
+srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shifter --image=flowcraft/skesa:2.3.0-1
+skesa --cores 16 --fastq <1> <2> --use_paired_ends > out.fasta
+
+
+#SPAdes
+srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shifter --image=cimendes/metaspades:11.10.2018-1
+spades.py -o out -t 16 --only-assembler --careful -1 mockSample_fwd_shuffled.fastq.gz -2 mockSample_rev_shuffled.fastq.gz
+
+
+minimap2 -x sr --secondary=no ../final.contigs.fa /home/cimendes/Binning_assessment/Mock_in_silico/mockSample_fwd_shuffled.fastq /home/cimendes/Binning_assessment/Mock_in_silico/mockSample_rev_shuffled.fastq

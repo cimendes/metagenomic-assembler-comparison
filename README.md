@@ -179,13 +179,47 @@ mapped contig and the reference.
 To obtain the contiguity, as well as other assembly statistics such as NA50, N50, number of contigs, number of aligned 
 contigs and aligned basepairs, and breadth of coverage, the `assembly_stats.py` script is used. 
 
-`python assembly_stats.py <assembly.fasta> <sample_name> <paf_file> data/reference/Zymos_Genomes_triple_chromosomes.fasta
+`python assembly_stats.py <assembly.fasta> <paf_file> data/reference/Zymos_Genomes_triple_chromosomes.fasta
 <assembler_name> > <assembler>_stats.tsv 2>> `
+
+### Chimera Assessment
+
+The metagenomic assembly can produce chimeric contigs when similar sequences belonging to different organisms are 
+assembled togethers. To assess the level of chimeric sequences produced, we've mapped the original sequence data to the 
+resulting assembly. To do that we used minimap2
+
+container: `cimendes/minimap2:2.17-1`  
+
+`minimap2 --secondary=no -x sr --eqx <assembly> <read_1> <read_2> > mapping.paf`
+
+For each assembly, the resulting PAF files are then analysed with the `contig_chimera.py` script.
+
+`python contig_chimera.py mapping.paf`
 
 
 ## Results
 
-WIP 
+### Simulated dataset
+
+<p align="center">
+  <img width="360" src="figures/MEGAHIT_table.png" alt="MEGAHIT_table"/>
+</p>
+
+<p align="center">
+  <img width="360" src="figures/metaSPAdes_table.png" alt="metaSPAdes_table"/>
+</p>
+
+<p align="center">
+  <img width="360" src="figures/SPAdes_table.png" alt="SPAdes_table"/>
+</p>
+
+<p align="center">
+  <img width="360" src="figures/SKESA_table.png" alt="SKESA_table"/>
+</p>
+
+<p align="center">
+  <img width="360" src="figures/all_assemblers_table.png" alt="all_assemblers_table"/>
+</p>
 
 
 ## Authors

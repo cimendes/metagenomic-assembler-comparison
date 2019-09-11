@@ -1,0 +1,9 @@
+reference	reference length	contiguity	identity	lowest identity	breadth of coverage	NA50	aligned contigs	aligned bp
+BS.pilon.polished.v3.ST170922	4045677.0	0.1900	1.0000	0.9990	0.9862	294425	53	3989749
+Enterococcus_faecalis_complete_genome	2845392.0	0.1895	1.0000	1.0000	0.9928	238960	36	2825024
+Escherichia_coli_chromosome	4765434.0	0.0950	1.0000	1.0000	0.9842	99093	200	4690376
+Lactobacillus_fermentum_complete_genome	1905333.0	0.0640	1.0000	1.0000	0.9508	46167	109	1811517
+Listeria_monocytogenes_complete_genome	2992342.0	0.2114	1.0000	1.0000	0.9788	351099	29	2929046
+Pseudomonas_aeruginosa_complete_genome	6792330.0	0.1252	1.0000	0.9950	0.9925	252244	102	6741519
+Salmonella_enterica_complete_genome	4759746.0	0.0822	1.0000	1.0000	0.9848	157956	107	4687210
+Staphylococcus_aureus_triple_chromosome	2718780.0	0.3498	1.0000	1.0000	0.9891	394979	38	2689081
