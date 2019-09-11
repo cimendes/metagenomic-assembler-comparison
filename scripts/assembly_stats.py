@@ -22,9 +22,9 @@ from statistics import mean
 def main():
     try:
         assembly_filename = sys.argv[1]
-        paf_filename = sys.argv[3]
-        ref_sequence = sys.argv[4]
-        assembler = sys.argv[5]
+        paf_filename = sys.argv[2]
+        ref_sequence = sys.argv[3]
+        assembler = sys.argv[4]
 
     # If no arguments were given, just print the header line.
     except IndexError:
