@@ -73,12 +73,12 @@ def main():
 
     print('\t'.join(
         ["assembler", "mean contiguity", " mean identity",
-         "mean breadth of coverage", "mean NA50", "mean aligned contigs",
-         "mean aligned bp", "contigs", "max contig length", "min contig lenght", "size bp", "n50"]), file=sys.stderr)
+         "mean breadth of coverage", "mean NA50", "aligned contigs",
+         "aligned bp", "contigs", "max contig length", "min contig lenght", "size bp", "n50"]), file=sys.stderr)
 
     result = [assembler, f'{mean(contiguity_all):.4f}', f'{mean(identity_all):.4f}',
-              f'{mean(coverage_all):.4f}', f'{mean(na50_all):.4f}', f'{mean(aligned_contigs_all):.4f}',
-              f'{mean(aligned_bp_all):.4f}', f'{contigs}', f'{max_contig_len}', f'{min_contig_len}', f'{size}', f'{n50}']
+              f'{mean(coverage_all):.4f}', f'{mean(na50_all):.4f}', f'{sum(aligned_contigs_all):.4f}',
+              f'{sum(aligned_bp_all):.4f}', f'{contigs}', f'{max_contig_len}', f'{min_contig_len}', f'{size}', f'{n50}']
 
     print('\t'.join(result), file=sys.stderr)
 
