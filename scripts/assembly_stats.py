@@ -69,16 +69,16 @@ def main():
         aligned_contigs_all.append(aligned_seq)
         aligned_bp_all.append(aligned_bp)
 
-    contigs, size, n50, min_contig_len, max_contig_len = get_assembly_stats(assembly_filename)
+    contigs, size, n50, max_contig_len, min_contig_len = get_assembly_stats(assembly_filename)
 
     print('\t'.join(
-        ["assembler", "mean contiguity", " mean identity", "mean breadth of coverage",
-         "mean NA50", "mean aligned contigs", "mean aligned bp", "contigs", "max contig length", "min contig lenght",
-         "size bp", "n50"]), file=sys.stderr)
+        ["assembler", "mean contiguity", " mean identity",
+         "mean breadth of coverage", "mean NA50", "mean aligned contigs",
+         "mean aligned bp", "contigs", "max contig length", "min contig lenght", "size bp", "n50"]), file=sys.stderr)
 
     result = [assembler, f'{mean(contiguity_all):.4f}', f'{mean(identity_all):.4f}',
               f'{mean(coverage_all):.4f}', f'{mean(na50_all):.4f}', f'{mean(aligned_contigs_all):.4f}',
-              f'{mean(aligned_bp_all):.4f}' f'{contigs}', f'{max_contig_len}', f'{min_contig_len}', f'{size}', f'{n50}']
+              f'{mean(aligned_bp_all):.4f}', f'{contigs}', f'{max_contig_len}', f'{min_contig_len}', f'{size}', f'{n50}']
 
     print('\t'.join(result), file=sys.stderr)
 
