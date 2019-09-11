@@ -22,7 +22,6 @@ from statistics import mean
 def main():
     try:
         assembly_filename = sys.argv[1]
-        sample_name = sys.argv[2]
         paf_filename = sys.argv[3]
         ref_sequence = sys.argv[4]
         assembler = sys.argv[5]
