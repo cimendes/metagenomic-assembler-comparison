@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 
-This script assesses contamination in
+This script assesses contamination in a metagenomic assemby. The reads must be identified with the
+origin genome in their name ab«nd the alignment saved in PAF format
 
 This script takes the following arguments (in this order):
   * list of alignment filenames PAF format (minimap2)
@@ -14,6 +15,7 @@ from collections import Counter
 from plotly.subplots import make_subplots
 import plotly.graph_objs as go
 import random
+
 
 def is_number(s):
     try:
