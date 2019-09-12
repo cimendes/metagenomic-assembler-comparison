@@ -1,0 +1,22 @@
+{'Escherichia', 'Salmonella'}:	151
+{'BS', 'Listeria'}:	4{'BS', 'Listeria', 'Enterococcus', 'Staphylococcus', 'Lactobacillus'}:	14
+{'Enterococcus', 'BS', 'Staphylococcus', 'Listeria'}:	3
+{'Pseudomonas', 'BS', 'Staphylococcus', 'Listeria'}:	1
+{'Salmonella', 'BS', 'Listeria', 'Pseudomonas', 'Escherichia'}:	1
+{'Enterococcus', 'Listeria'}:	3
+{'Enterococcus', 'BS', 'Listeria'}:	1
+{'Salmonella', 'BS', 'Listeria', 'Pseudomonas', 'Escherichia', 'Staphylococcus'}:	1
+{'BS', 'Staphylococcus'}:	6
+{'Pseudomonas', 'Salmonella'}:	2
+{'Pseudomonas', 'BS'}:	1
+{'BS', 'Staphylococcus', 'Listeria'}:	3
+{'Pseudomonas', 'Escherichia', 'Salmonella', 'Listeria'}:	1
+{'Pseudomonas', 'Escherichia', 'Salmonella'}:	3
+{'BS', 'Listeria', 'Pseudomonas', 'Enterococcus', 'Staphylococcus'}:	1
+{'Enterococcus', 'Listeria', 'Staphylococcus', 'Lactobacillus'}:	1
+{'Salmonella', 'BS', 'Listeria', 'Escherichia', 'Enterococcus', 'Staphylococcus', 'Lactobacillus'}:	1
+{'BS', 'Listeria', 'Escherichia', 'Enterococcus', 'Staphylococcus'}:	1
+{'Staphylococcus', 'Lactobacillus'}:	1
+{'Listeria', 'BS', 'Staphylococcus', 'Lactobacillus'}:	1
+{'Enterococcus', 'BS'}:	1
+{'BS', 'Lactobacillus', 'Staphylococcus', 'Listeria'}:	1
