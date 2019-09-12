@@ -226,7 +226,7 @@ For each assembly, the resulting PAF files are then analysed with the `contig_ch
 </p>
 
 <p align="center">
-  <img width="800" src="figures/mock_assembly_scatter.png" alt="mock_assembly_scatter"/>
+  <img width="800" src="figures/mock_assembly_violin.png" alt="mock_assembly_violin"/>
 </p>
 
 

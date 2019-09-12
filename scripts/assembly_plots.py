@@ -14,6 +14,10 @@ from plotly.subplots import make_subplots
 import plotly.graph_objs as go
 import random
 from itertools import groupby
+from math import log
+import plotly.express as px
+import pandas as pd
+import plotly.figure_factory as ff
 
 
 def parse_fasta(fasta_file):
@@ -26,7 +30,7 @@ def parse_fasta(fasta_file):
     for header in entry:
         header_str = header.__next__()[1:].strip().split()[0]
         seq = "".join(s.strip() for s in entry.__next__())
-        size.append(len(seq))
+        size.append(log(len(seq)))
 
     return size
 
@@ -40,23 +44,16 @@ def main():
     except IndexError:
         print("No files provided. Exiting.. ")
         sys.exit(0)
-
     fig = make_subplots(rows=1, cols=len(fasta_files), shared_yaxes=True,
                         subplot_titles=("MEGAHIT", "metaSPADES", "SKESA", "SPADES"))
 
     for fasta in fasta_files:
-
-        contig_sizes = parse_fasta(fasta)
-
-        fig.append_trace(go.Scatter(
-            x=[random.uniform(0, 1) for i in range(len(contig_sizes))],
-            y=contig_sizes,
-            name=os.path.basename(fasta).split("_")[1],
-            mode='markers',
-            opacity=0.7,
-        ), 1, fasta_files.index(fasta) + 1)
+        data = parse_fasta(fasta)
+        fig.add_trace(go.Violin(y=data, box_visible=True, meanline_visible=True), 1, fasta_files.index(fasta) + 1)
 
     fig.update_xaxes(showticklabels=False)
+    fig.update_yaxes(showticklabels=False)
+    fig.update_layout(showlegend=False)
     fig.show()
 
 
