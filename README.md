@@ -221,6 +221,10 @@ For each assembly, the resulting PAF files are then analysed with the `contig_ch
   <img width="800" src="figures/all_assemblers_table.png" alt="all_assemblers_table"/>
 </p>
 
+<p align="center">
+  <img width="800" src="figures/mock_chimeras.png" alt="mock_chimeras"/>
+</p>
+
 
 ## Authors
 
