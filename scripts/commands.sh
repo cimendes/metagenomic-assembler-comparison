@@ -9,6 +9,9 @@ srun --pty --nodes=1 --cpus-per-task=40 --mem-per-cpu=6 --tasks-per-node=1 shift
 fq2fa --merge ERR2984773_1.fq ERR2984773_2.fq reads.fa
 idba_ud -l reads.fa --num_threads 16 -o out # -l reads longer than 128 nucleotides. sample had 150nt
 
+srun --pty --nodes=1 --cpus-per-task=40 --mem-per-cpu=16 --tasks-per-node=1 shifter --image=loneknightpy/idba
+idba_ud -l reads.fa --num_threads 16 -o out2
+
 #bbtools
 reformat.sh in1=mockSample_fwd_shuffled.fastq.gz in2=mockSample_rev_shuffled.fastq.gz out=mockSample_reads.fasta
 idba_ud -l mockSample_reads.fasta --num_threads 40 -o out

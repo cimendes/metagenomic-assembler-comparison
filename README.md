@@ -56,18 +56,21 @@ differential abundance (M), and High complexity with time series (H)). These dat
 
 ### Assembly softwares and commands
 
-I've followed the following [metagenomic assembly tools table](https://academic.oup.com/view-large/131667617), published
- by [Ayling et al. 2019](https://academic.oup.com/bib/advance-article/doi/10.1093/bib/bbz020/5363831), as base for 
- selecting metagenomic software to bee tested. In total 17 tools are presented. [IVA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4495290/) 
- and [SAVAGE](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5411778/) were removed as they were aimed at viruses, 
- as well as [Genovo](https://www.liebertpub.com/doi/abs/10.1089/cmb.2010.0244?rfr_dat=cr_pub%3Dpubmed&url_ver=Z39.88-2003&rfr_id=ori%3Arid%3Acrossref.org&journalCode=cmb) 
- and [MAP](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/bts162) due to 
- unavailability of software, [VICUNA](https://www.broadinstitute.org/viral-genomics/viral-genomics-analysis-software-registration) 
- due to requiring registeration, [Omega](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btu395) 
- as it was an assembly pipeline, abd [BBAP](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5406902/), 
- [MetaVelvet](http://metavelvet.dna.bio.keio.ac.jp/), [MEtaVelvet-SL](http://metavelvet.dna.bio.keio.ac.jp/MSL.html), 
- [PRICE](http://derisilab.ucsf.edu/software/price/) and [Ray Meta](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2012-13-12-r122)
- due to no update sinde 2016. The following tools will be tested:
+[Ayling et al. 2019](https://academic.oup.com/bib/advance-article/doi/10.1093/bib/bbz020/5363831) published recently a 
+review on the different approaches for metagenome assembly with short reads, compiling an exhaustive table describing 
+the most of [metagenomic assembly tools available](https://academic.oup.com/view-large/131667617). 
+A total 17 tools are presented. Of these, [IVA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4495290/) and 
+[SAVAGE](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5411778/) were aimed at viruses. Additionally, [Genovo's](https://www.liebertpub.com/doi/abs/10.1089/cmb.2010.0244?rfr_dat=cr_pub%3Dpubmed&url_ver=Z39.88-2003&rfr_id=ori%3Arid%3Acrossref.org&journalCode=cmb) 
+and [MAP's](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/bts162) source codes are 
+no longer available, [VICUNA](https://www.broadinstitute.org/viral-genomics/viral-genomics-analysis-software-registration) 
+requires registration and cannot be executed locally, and [Omega](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btu395) 
+is an assembly pipeline. [MegaGTA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5657035/), [Snowball]() and [Xander]() are not *de novo* assemblers, performing instead guided 
+assembly targeting specific genes, that falls outside the scope of this review. Of the remaining tools, [BBAP](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5406902/), 
+[MetaVelvet](http://metavelvet.dna.bio.keio.ac.jp/), [PRICE](http://derisilab.ucsf.edu/software/price/) and 
+[Ray Meta](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2012-13-12-r122) are also excluded due to no 
+update since 2015. 
+
+The following tools will be tested:
 
 #### IDBA-UD :skull:
 Published by [Peng et al. 2012](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/bts174),
@@ -79,14 +82,18 @@ Published by [Peng et al. 2012](https://academic.oup.com/bioinformatics/article-
  https://github.com/loneknightpy/idba, and an official docker image at https://hub.docker.com/r/loneknightpy/idba
 Last update: 31/12/2016 (GitHub)
 
-#### MegaGTA :skull:
-Published by [Le et al. 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5657035/), MegaGTA is a gene-targeted 
-assembler that utilizes iterative de Bruijn graphs. It tries to improve on Xander assembler, implementing the same 
-method of using the trained Hidden Markov Model (HMM) to guide the traversal of de Bruijn graph, but using mutiple k-mer 
-sizes to take full advantage of multiple k-mer sizes to make the best of both sensitivity and accuracy. 
-The latest version is available at https://github.com/HKU-BAL/MegaGTA. 
-Last update: 16/06/2016 (GitHub)
+docker container: ``
+command: ``
 
+#### MetaVelvet-SL
+This De Brujin graph assembler, published by [](), works similarly to [MetaVelvet](http://metavelvet.dna.bio.keio.ac.jp/) 
+by assemblying the data by populating a structure estimated from the coverage of nodes (poisson distributions). The De 
+Brujin graph is partitioned into hypothetical subgraphs (possible different species) using these distributions as a 
+guide. Differently from MetaVelvet, MetaVelvet-SL identifies chimeric contigs though a support-vector machine (SVM) 
+trained on paired-end, converage, and contig lenghts for each dinucleotide and passed on to the De Brujin graph for 
+decomposition. 
+
+docker container: `cimendes/metavelvet-sl:1.2.02-1`
 
 #### MEGAHIT
 MEGAHIT, published by [Li et al. 2015](https://academic.oup.com/bioinformatics/article/31/10/1674/177884), *de novo* 
