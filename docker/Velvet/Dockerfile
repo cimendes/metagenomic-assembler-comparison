@@ -11,6 +11,6 @@ RUN wget https://www.ebi.ac.uk/~zerbino/velvet/velvet_1.2.10.tgz
 RUN tar xf velvet_1.2.10.tgz && rm velvet_1.2.10.tgz
 
 RUN cd velvet_1.2.10 && make
-ENV PATH="/NGStools/velvet_1.2.10:$PATH#
+ENV PATH="/NGStools/velvet_1.2.10:$PATH"
 
 
