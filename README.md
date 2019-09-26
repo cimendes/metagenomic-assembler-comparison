@@ -73,19 +73,20 @@ update since 2015.
 The following tools will be tested:
 
 #### IDBA-UD :skull:
-Published by [Peng et al. 2012](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/bts174),
- it's a De Brujin graph assembler for assembling reads from single-cell sequencing or metagenomic sequencing 
- technologies with uneven sequencing depths. It employs multiple depthrelative thresholds to remove erroneous k-mers in 
- both low-depth and high-depth regions. The technique of local assembly with paired-end information is used to solve the 
- branch problem of low-depth short repeat regions. To speed up the process, an error correction step is conducted to 
- correct reads of high-depth regions that can be aligned to highconfident contigs. The latest version is available at 
- https://github.com/loneknightpy/idba, and an official docker image at https://hub.docker.com/r/loneknightpy/idba
+Published by [Peng et al. 2012](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/bts174), 
+it's a De Brujin graph assembler for assembling reads from single-cell sequencing or metagenomic sequencing technologies 
+with uneven sequencing depths. It employs multiple depth relative thresholds to remove erroneous k-mers in both 
+low-depth and high-depth regions. The technique of local assembly with paired-end information is used to solve the 
+branch problem of low-depth short repeat regions. To speed up the process, an error correction step is conducted to 
+correct reads of high-depth regions that can be aligned to high confidence contigs. 
+The latest version is available at https://github.com/loneknightpy/idba, and an official docker image at
+https://hub.docker.com/r/loneknightpy/idba
 Last update: 31/12/2016 (GitHub)
 
-docker container: ``
+docker container: `oneknightpy/idba:latest`
 command: ``
 
-#### MetaVelvet-SL
+#### MetaVelvet-SL :skull:
 This De Brujin graph assembler, published by [](), works similarly to [MetaVelvet](http://metavelvet.dna.bio.keio.ac.jp/) 
 by assemblying the data by populating a structure estimated from the coverage of nodes (poisson distributions). The De 
 Brujin graph is partitioned into hypothetical subgraphs (possible different species) using these distributions as a 
@@ -106,14 +107,6 @@ Last update: 12/08/2019 (GitHub)
 
 docker container: `cimendes/megahit-assembler:12.08.19-1`
 command: `megahit -1 read_1.fq.gz -2 read_2.fq.gz -o out -t 16`
-
-#### Snowball :skull:
-Published by [Gregot et al. 2016](https://academic.oup.com/bioinformatics/article/32/17/i649/2450756), Snowball is a 
-novel strain aware gene assembler for shotgun metagenomic data that does not require closely related reference genomes 
-to be available. Like MegaGTA and Xander, it uses profile hidden Markov models (HMMs) of gene domains of interest to 
-guide the assembly. 
-The latest version is available at https://github.com/hzi-bifo/snowball
-Last update: 24/09/2017 (GitHub)
 
 #### SPAdes
 A tool aiming to resolve uneven coverage in single cell genome data through multiple k-mer sizes of De Brujin graphs. It
@@ -143,12 +136,6 @@ Last update: 09/10/2018 (GitHub)
 
 docker container: `cimendes/`
 command: `skesa --cores 16 --fastq read_1.fq.gz read_2.fq.gz --use_paired_ends > out.fasta`
-
-#### Xander :skull:
-Like Snowball and MegaGTA, Xander employs HMM profile model to perform a guided assembly targeting specific genes. These 
-are used to create a novel combined weighted assembly graph. Xander performs both assembly and annotation concomitantly 
-using information incorporated in this graph. It was published by [Wang et al. 2015](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6) and it's available at https://github.com/rdpstaff/Xander_assembler.
-Last update: 27/10/2017 (GitHub)
 
  
  ### Assessing Metagenomic Assembly Success
