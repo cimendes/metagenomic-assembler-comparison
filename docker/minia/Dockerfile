@@ -17,4 +17,6 @@ RUN cd cmake-3.15.3 && ./bootstrap && make && make install
 WORKDIR /NGStools
 RUN git clone --recursive https://github.com/GATB/minia.git
 RUN cd minia && sh INSTALL
-ENV PATH="/NGStools/minia:$PATH"
+ENV PATH="/NGStools/minia/build/bin:$PATH"
+
+WORKDIR /data
