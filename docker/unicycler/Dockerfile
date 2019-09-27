@@ -21,10 +21,10 @@ RUN apt-get update && apt-get install -y software-properties-common &&\
 WORKDIR /NGStools
 
 #get unicycler
-RUN wget https://github.com/rrwick/Unicycler/archive/v0.4.7.tar.gz &&\
+RUN wget https://github.com/rrwick/Unicycler/archive/v0.4.8.tar.gz &&\
  mkdir unicycler &&\
- tar -xzvf v0.4.7.tar.gz -C unicycler --strip-components 1 &&\
- rm v0.4.7.tar.gz
+ tar -xzvf v0.4.8.tar.gz -C unicycler --strip-components 1 &&\
+ rm v0.4.8.tar.gz
 
 #get pilon
 RUN wget https://github.com/broadinstitute/pilon/releases/download/v1.22/pilon-1.22.jar -P /pilon
