@@ -5,7 +5,8 @@ RUN apt-get update && apt-get -y install build-essential \
     wget \
     zlib1g-dev \
     perl \
-    zip
+    zip \
+    python-dev
 
 WORKDIR NGStools/
 
@@ -31,3 +32,4 @@ ENV PATH="/NGStools/samtools:$PATH"
 RUN wget https://sourceforge.net/projects/metassembler/files/v1.5/Metassembler.1.5.tar.gz
 RUN tar xf Metassembler.1.5.tar.gz && rm Metassembler.1.5.tar.gz
 RUN cd Metassembler && make
+ENV PATH="/NGStools/Metassembler/bin:$PATH"

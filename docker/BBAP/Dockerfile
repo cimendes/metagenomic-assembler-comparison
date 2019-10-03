@@ -17,6 +17,7 @@ ENV PATH="/NGStools/ncbi-blast-2.9.0+/bin:${PATH}"
 RUN wget http://homepage.ntu.edu.tw/~youylin/BBAP.rar
 RUN unrar x BBAP.rar && rm BBAP.rar
 
+RUN chmod +x /NGStools/BBAP/*.pl
 ENV PATH="/NGStools/BBAP:${PATH}"
 
 WORKDIR /data
