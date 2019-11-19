@@ -278,6 +278,9 @@ process VELVETOPTIMIZER {
     """
     VelvetOptimiser.pl -v -s $params.velvetoptimizer_hashs -e $params.velvetoptimizer_hashe -t $task.cpus \
     -f '-shortPaired -fastq.gz -separate ${fastq_pair[0]} ${fastq_pair[1]}'
+
+    mv auto_data*/contigs.fa ${sample_id}_velvetoptimizer.fasta
+    rm -r auto_data*
     """
 
 }
