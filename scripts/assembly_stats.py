@@ -16,7 +16,7 @@ with no arguments to get the header line.
 import re
 import sys
 from itertools import groupby
-from statistics import mean
+from statistics import mean, pstdev
 
 
 def main():
@@ -27,10 +27,8 @@ def main():
         assembler = sys.argv[4]
 
     # If no arguments were given, just print the header line.
-    except IndexError:
-        print('\t'.join(
-            ["name", "assembler", "mean contiguity", " mean identity", " lowest identity", "mean coverage", "n contigs",
-             "mean NA50", "mean aligned contigs", "mean aligned bp", "size", "n50"]), file=sys.stderr)
+    except IndexError as e:
+        print(e, file=sys.stderr)
         sys.exit(0)
 
     fh_reference = open(ref_sequence, "r")
@@ -46,20 +44,24 @@ def main():
     aligned_contigs_all = []
     aligned_bp_all = []
 
+    contigs, size = get_assembly_stats(assembly_filename)
+
+    #print(contigs, size)
+
     # print specific file header to stdout.
-    print('\t'.join(["reference", "reference length", "contiguity", "identity", "lowest identity",
-                     "breadth of coverage", "NA50", "aligned contigs", "aligned bp"]))
+    print(','.join(["reference", "reference length", "contiguity", "identity", "lowest identity",
+                     "breadth of coverage", "aligned contigs", "aligned bp"]))
 
     for header in entry:
 
         header_str = header.__next__()[1:].strip().split()[0]
         seq = "".join(s.strip() for s in entry.__next__())
 
-        contiguity, identity, lowest_window_identity, coverage, na50, aligned_seq, aligned_bp = get_alignment_stats(
-            paf_filename, header_str, len(seq)/3)
 
-        print('\t'.join([header_str, f'{len(seq)/3}', f'{contiguity:.4f}', f'{identity:.4f}', f'{lowest_window_identity:.4f}',
-                         f'{coverage:.4f}', f'{na50}', f'{aligned_seq}', f'{aligned_bp}']))
+        contiguity, identity, lowest_window_identity, coverage, na50, aligned_seq, aligned_bp = get_alignment_stats(paf_filename, header_str, len(seq)/3)
+
+        print(','.join([header_str, f'{len(seq)/3}', f'{contiguity:.4f}', f'{identity:.4f}', f'{lowest_window_identity:.4f}',
+                         f'{coverage:.4f}', f'{aligned_seq}', f'{aligned_bp}']))
 
         contiguity_all.append(contiguity)
         identity_all.append(identity)
@@ -69,18 +71,17 @@ def main():
         aligned_contigs_all.append(aligned_seq)
         aligned_bp_all.append(aligned_bp)
 
-    contigs, size, n50, max_contig_len, min_contig_len = get_assembly_stats(assembly_filename)
+    print(','.join(
+        ["assembler", "mean contiguity", "contiguity std", " mean identity", "% aligned contigs",
+         "% aligned bp"]), file=sys.stderr)
 
-    print('\t'.join(
-        ["assembler", "mean contiguity", " mean identity",
-         "mean breadth of coverage", "mean NA50", "aligned contigs",
-         "aligned bp", "contigs", "max contig length", "min contig lenght", "size bp", "n50"]), file=sys.stderr)
+    result = [assembler, f'{mean(contiguity_all):.4f}', f'{pstdev(contiguity_all):.4f}', f'{mean(identity_all):.4f}',
+              f'{sum(aligned_contigs_all)/contigs:.4f}', f'{sum(aligned_bp_all)/size:.4f}']
 
-    result = [assembler, f'{mean(contiguity_all):.4f}', f'{mean(identity_all):.4f}',
-              f'{mean(coverage_all):.4f}', f'{mean(na50_all):.4f}', f'{sum(aligned_contigs_all):.4f}',
-              f'{sum(aligned_bp_all):.4f}', f'{contigs}', f'{max_contig_len}', f'{min_contig_len}', f'{size}', f'{n50}']
+    print(','.join(result), file=sys.stderr)
 
-    print('\t'.join(result), file=sys.stderr)
+    #print(sum(aligned_contigs_all))
+    #print(contigs, aligned_contigs_all, sum(aligned_contigs_all)/contigs)
 
 
 def get_alignment_stats(paf_filename, ref_name, ref_length):
@@ -155,7 +156,7 @@ def get_assembly_stats(assembly_filename):
         if length_so_far >= target_length:
             n50 = contig_length
             break
-    return len(contig_lengths), total_length, n50, max(contig_lengths), min(contig_lengths)
+    return len(contig_lengths), total_length
 
 
 def get_contig_lengths(filename):

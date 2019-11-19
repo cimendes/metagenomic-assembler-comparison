@@ -309,13 +309,13 @@ process IDBA {
     set sample_id, file(fasta_reads_single) from  REFORMAT_IDBA
 
     output:
-    set sample_id, file('*_idba_contig.fa') into OUT_IDBA
+    set sample_id, file('*_idba.fasta') into OUT_IDBA
 
     script:
     """
     idba_ud -l ${fasta_reads_single} --num_threads $task.cpus -o .
-    mv contig.fa ${sample_id}_idba_contig.fa
-
+    mv contig.fa ${sample_id}_idba.fasta
+    rm begin align-* contig-* graph-* kmer local-*
     """
 }
 
