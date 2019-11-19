@@ -43,12 +43,12 @@ IN_fastq_raw.into{ IN_BCALM2; IN_GATB_MINIA; IN_MEGAHIT; IN_METASPADES; IN_UNICY
 // BCALM 2
 
 if ( !params.bcalmKmerSize.toString().isNumber() ){
-    exit 1, "'bcalmKmerSize' parameter must be a number. Provided value: '${params.bcalmKmes%rSize}'"
+    exit 1, "'bcalmKmerSize' parameter must be a number. Provided value: '${params.bcalmKmerSize}'"
 }
 
 process BCALM2 {
 
-    tag { sample_id }
+    tag {sample_id}
     publishDir "results/bcalm2/"
 
     input:
@@ -56,7 +56,7 @@ process BCALM2 {
     val KmerSize from Channel.value(params.bcalmKmerSize)
 
     output:
-    file "*_BCALM2.fasta"
+    set sample_id, file("*_BCALM2.fasta") into OUT_BCALM2
 
     script:
     """
@@ -74,7 +74,6 @@ process BCALM2 {
 
 
 // GATB MINIA
-
 IN_GATB_kmers = Channel.value(params.gatbkmer)
 IN_GATB_besst_iter = Channel.value(params.gatb_besst_iter)
 GATB_error_correction = params.GATB_error_correction ? "true" : "false"
@@ -82,8 +81,8 @@ IN_error_correction = Channel.value(GATB_error_correction)
 
 process GATBMINIAPIPELINE {
 
-    tag { sample_id }
-    publishDir 'results/GATBMiniaPipeline/', pattern: '*.fasta'
+    tag {sample_id}
+    publishDir 'results/GATBMiniaPipeline/'
 
     input:
     set sample_id, file(fastq_pair) from IN_GATB_MINIA
@@ -92,7 +91,7 @@ process GATBMINIAPIPELINE {
     val besst_iter from IN_GATB_besst_iter
 
     output:
-    file('*.fasta')
+    set sample_id, file('*_GATBMiniaPipeline.fasta') into OUT_GATB
 
     script:
     """
@@ -103,10 +102,10 @@ process GATBMINIAPIPELINE {
         gatb -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} --kmer-sizes ${kmer_list} -o ${sample_id}_GATBMiniaPipeline --no-error-correction
     fi
 
-    link=$(readlink ${sample_id}_GATBMiniaPipeline.fasta) && rm ${sample_id}_GATBMiniaPipeline.fasta && mv $link ${sample_id}_GATBMiniaPipeline.fasta
+    link=\$(readlink ${sample_id}_GATBMiniaPipeline.fasta) && rm ${sample_id}_GATBMiniaPipeline.fasta && mv \$link ${sample_id}_GATBMiniaPipeline.fasta
 
     # rm temp dirs
-    rm -r ${sample_id}_GATBMiniaPipeline.lib* ${sample_id}_GATBMiniaPipeline_besst *.unitigs* *contigs.fa *.h5
+    rm -r *_GATBMiniaPipeline.lib* *_GATBMiniaPipeline_besst *.unitigs* *contigs.fa *.h5
     rm *list_reads*
 
     """
@@ -127,7 +126,7 @@ process MEGAHIT {
     val kmers from IN_megahit_kmers
 
     output:
-    set sample_id, file('*_megahit.fasta')
+    set sample_id, file('*_megahit.fasta') into OUT_MEGAHIT
 
     script:
     """
@@ -158,7 +157,7 @@ process METASPADES {
     val kmers from IN_metaspades_kmers
 
     output:
-    set sample_id, file('*_metaspades.fasta')
+    set sample_id, file('*_metaspades.fasta') into OUT_METASPADES
     file('*_metaspades.fastg')
 
     script:
@@ -181,7 +180,7 @@ process UNICYCLER {
     set sample_id, file(fastq_pair) from IN_UNICYCLER
 
     output:
-    set sample_id, file('*_unicycler.*')
+    set sample_id, file('*_unicycler.fasta') into OUT_UNICYCLER
     file('*_unicycler.gfa')
 
     script:
@@ -212,7 +211,7 @@ process SPADES {
     val kmers from IN_spades_kmers
 
     output:
-    set sample_id, file('*_spades.fasta')
+    set sample_id, file('*_spades.fasta') into OUT_SPADES
     file('*_spades.fastg')
 
     script:
@@ -234,7 +233,7 @@ process SKESA {
     set sample_id, file(fastq_pair) from IN_SKESA
 
     output:
-    set sample_id, file('*_skesa.fasta')
+    set sample_id, file('*_skesa.fasta') into OUT_SKESA
 
     script:
     """
@@ -253,7 +252,7 @@ process PANDASEQ {
     set sample_id, file(fastq_pair) from IN_PANDASEQ
 
     output:
-    set sample_id, file('*pandaseq.fasta')
+    set sample_id, file('*pandaseq.fasta') into OUT_PANDASEQ
 
     script:
     """
@@ -273,7 +272,7 @@ process VELVETOPTIMIZER {
     set sample_id, file(fastq_pair) from IN_VELVETOPTIMIZER
 
     output:
-    file('*.fasta')
+    set sample_id, file('*.fasta') into OUT_VELVETOPTIMIZER
 
     script:
     """
@@ -285,7 +284,6 @@ process VELVETOPTIMIZER {
 
 
 // IDBA
-
 process reformat_IDBA {
     tag { sample_id }
 
@@ -308,7 +306,7 @@ process IDBA {
     set sample_id, file(fasta_reads_single) from  REFORMAT_IDBA
 
     output:
-    set sample_id, file('*_idba_contig.fa')
+    set sample_id, file('*_idba_contig.fa') into OUT_IDBA
 
     script:
     """
@@ -316,39 +314,27 @@ process IDBA {
     mv contig.fa ${sample_id}_idba_contig.fa
 
     """
-
 }
 
 
-// VELOUR
-IN_kmers_velour = Channel.value(params.velourKmer)
+// FILTER_ASSEMBLY
+IN_FILTER = Channel.create()
+IN_FILTER.mix(OUT_BCALM2, OUT_GATB, OUT_MEGAHIT, OUT_METASPADES, OUT_UNICYCLER, OUT_SPADES, OUT_SKESA, OUT_PANDASEQ, OUT_VELVETOPTIMIZER, OUT_IDBA)
 
-process reformat_VELOUR {
-    tag { sample_id }
+IN_minLen = Channel.value(params.minLength)
 
-    input:
-    set sample_id, file(fastq_pair) from IN_VELOUR
+process FILTER_ASSEMBLY {
 
-    output:
-    set sample_id, file('*.fasta') into REFORMAT_VELOUR
-
-    script:
-    "reformat.sh in=${fastq_pair[0]} in2=${fastq_pair[1]} out=${sample_id}_1.fasta out2=${sample_id}_2.fasta"
-}
-
-process VELOUR {
-    tag { sample_id }
-    publishDir 'results/assembly/Velour_{{ pid }}/', pattern: 'out/*.fasta', mode: 'copy'
+    tag {sample_id}
+    publishDir ' /results/filtered/'
 
     input:
-    set sample_id, file(fasta_reads_pair) from REFORMAT_VELOUR
-    val kmer from IN_kmers_velour
+    set sample_id, file(assembly) from IN_FILTER
+    val minLen from IN_minLen
 
     output:
-    file('out/*.fasta')
+    file('filtered_*')
 
     script:
-    """
-    velour out ${kmer} ${fasta_reads_pair}
-    """
+    "reformat.sh in=${assembly} out=filtered_${assembly} minlength=${minLen}"
 }
