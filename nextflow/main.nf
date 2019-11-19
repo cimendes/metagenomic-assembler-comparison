@@ -237,7 +237,7 @@ process SKESA {
 
     script:
     """
-    skesa --cores $task.cpus --memory $task.memory --use_paired_ends --contigs_out ${sample_id}_skesa.fasta --gfa ${sample_id}_skesa.fastg --fastq ${fastq_pair[0]} ${fastq_pair[1]}
+    skesa --cores $task.cpus --memory $task.memory --use_paired_ends --contigs_out ${sample_id}_skesa.fasta --fastq ${fastq_pair[0]} ${fastq_pair[1]}
     """
 }
 
@@ -321,8 +321,8 @@ process IDBA {
 
 
 // FILTER_ASSEMBLY
-IN_FILTER = Channel.create()
-IN_FILTER.mix(OUT_BCALM2, OUT_GATB, OUT_MEGAHIT, OUT_METASPADES, OUT_UNICYCLER, OUT_SPADES, OUT_SKESA, OUT_PANDASEQ, OUT_VELVETOPTIMIZER, OUT_IDBA)
+TO_FILTER = Channel.create()
+IN_FILTER = TO_FILTER.mix(OUT_BCALM2, OUT_GATB, OUT_MEGAHIT, OUT_METASPADES, OUT_UNICYCLER, OUT_SPADES, OUT_SKESA, OUT_PANDASEQ, OUT_VELVETOPTIMIZER, OUT_IDBA)
 
 IN_minLen = Channel.value(params.minLength)
 
