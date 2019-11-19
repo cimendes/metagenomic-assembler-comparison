@@ -258,7 +258,7 @@ process PANDASEQ {
     """
     cp -r /NGStools/pandaseq pandaseq/
 
-    ./pandaseq/pandaseq -T $task.cpus -w ${sample_id}_pandaseq.fasta -f ${fastq_pair[0]} -r ${fastq_pair[1]}
+    ./pandaseq/pandaseq -T $task.cpus -w ${sample_id}_pandaseq.fasta -f ${fastq_pair[0]} -r ${fastq_pair[1]} -B
     rm pandaseq
     """
 }
