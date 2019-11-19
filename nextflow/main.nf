@@ -49,27 +49,26 @@ if ( !params.bcalmKmerSize.toString().isNumber() ){
 process BCALM2 {
 
     tag { sample_id }
-    publishDir "results/bcalm/$sample_id"
+    publishDir "results/bcalm2/"
 
     input:
     set sample_id, file(fastq) from IN_BCALM2
     val KmerSize from Channel.value(params.bcalmKmerSize)
 
     output:
-    file "*.unitigs.fasta"
+    file "*_BCALM2.fasta"
 
     script:
     """
     ls -1 $fastq  > list_reads
-    bcalm -in list_reads -out unitig -kmer-size $KmerSize
+    bcalm -in list_reads -out ${sample_id} -kmer-size $KmerSize
+
+    # workdir cleanup
     rm list_reads
+    rm *.h5
+    rm *.glue.*
 
-    mv unitig.unitigs.fa  ${sample_id}.unitigs.fasta
-
-    if [ "$clear" = "true" ];
-    then
-        find . -type f  -print | egrep "work/.*(h5)|(glue)" | xargs -L 1 rm
-    fi
+    mv ${sample_id}.unitigs.fa  ${sample_id}_BCALM2.fasta
     """
 }
 
@@ -81,7 +80,7 @@ IN_GATB_besst_iter = Channel.value(params.gatb_besst_iter)
 GATB_error_correction = params.GATB_error_correction ? "true" : "false"
 IN_error_correction = Channel.value(GATB_error_correction)
 
-process GATBMiniaPipeline {
+process GATBMINIAPIPELINE {
 
     tag { sample_id }
     publishDir 'results/GATBMiniaPipeline/', pattern: '*.fasta'
@@ -104,6 +103,12 @@ process GATBMiniaPipeline {
         gatb -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} --kmer-sizes ${kmer_list} -o ${sample_id}_GATBMiniaPipeline --no-error-correction
     fi
 
+    link=$(readlink ${sample_id}_GATBMiniaPipeline.fasta) && rm ${sample_id}_GATBMiniaPipeline.fasta && mv $link ${sample_id}_GATBMiniaPipeline.fasta
+
+    # rm temp dirs
+    rm -r ${sample_id}_GATBMiniaPipeline.lib* ${sample_id}_GATBMiniaPipeline_besst *.unitigs* *contigs.fa *.h5
+    rm *list_reads*
+
     """
 }
 
@@ -122,12 +127,13 @@ process MEGAHIT {
     val kmers from IN_megahit_kmers
 
     output:
-    set sample_id, file('*final.contigs.fa')
+    set sample_id, file('*_megahit.fasta')
 
     script:
     """
     /NGStools/megahit/bin/megahit --num-cpu-threads $task.cpus -o megahit --k-list $kmers -1 ${fastq_pair[0]} -2 ${fastq_pair[1]}
-    mv megahit/final.contigs.fa ${sample_id}_megahit.final.contigs.fa
+    mv megahit/final.contigs.fa ${sample_id}_megahit.fasta
+    rm -r megahit
     """
 
 }
@@ -152,12 +158,15 @@ process METASPADES {
     val kmers from IN_metaspades_kmers
 
     output:
-    set sample_id, file('*metaspades.fasta')
+    set sample_id, file('*_metaspades.fasta')
+    file('*_metaspades.fastg')
 
     script:
     """
     metaspades.py --only-assembler --threads $task.cpus -k $kmers -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} -o metaspades
     mv metaspades/contigs.fasta ${sample_id}_metaspades.fasta
+    mv metaspades/assembly_graph.fastg ${sample_id}_metaspades.fastg
+    rm -r metaspades
     """
 }
 
@@ -166,21 +175,26 @@ process METASPADES {
 process UNICYCLER {
 
     tag { sample_id }
-    publishDir 'results/unicycler/$sample_id', pattern: 'assembly.fasta'
+    publishDir 'results/unicycler'
 
     input:
     set sample_id, file(fastq_pair) from IN_UNICYCLER
 
     output:
-    set sample_id, file('assembly.fasta')
+    set sample_id, file('*_unicycler.*')
+    file('*_unicycler.gfa')
 
     script:
-    "unicycler -t $task.cpus -o . --no_correct --no_pilon -1 ${fastq_pair[0]} -2 ${fastq_pair[1]}"
+    """
+    unicycler -t $task.cpus -o . --no_correct --no_pilon -1 ${fastq_pair[0]} -2 ${fastq_pair[1]}
+    mv assembly.fasta ${sample_id}_unicycler.fasta
+    mv assembly.gfa ${sample_id}_unicycler.gfa
+    rm *best_spades_graph* *overlaps_removed* *bridges_applied* *final_clean*
+    """
 }
 
 
 // SPADES
-
 if ( params.spadesKmers.toString().split(" ").size() <= 1 ){
     if (params.spadesKmers.toString() != 'auto'){
         exit 1, "'spadesKmers' parameter must be a sequence of space separated numbers or 'auto'. Provided value: ${params.spadesKmers}"
@@ -198,12 +212,15 @@ process SPADES {
     val kmers from IN_spades_kmers
 
     output:
-    set sample_id, file('*spades.fasta')
+    set sample_id, file('*_spades.fasta')
+    file('*_spades.fastg')
 
     script:
     """
     spades.py --only-assembler --threads $task.cpus -k $kmers -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} -o spades
     mv spades/contigs.fasta ${sample_id}_spades.fasta
+    mv spades/assembly_graph.fastg ${sample_id}_spades.fastg
+    rm -r spades
     """
 }
 
@@ -220,7 +237,9 @@ process SKESA {
     set sample_id, file('*_skesa.fasta')
 
     script:
-    "skesa --cores $task.cpus --memory $task.memory --use_paired_ends --contigs_out ${sample_id}_skesa.fasta --fastq ${fastq_pair[0]} ${fastq_pair[1]}"
+    """
+    skesa --cores $task.cpus --memory $task.memory --use_paired_ends --contigs_out ${sample_id}_skesa.fasta --gfa ${sample_id}_skesa.fastg --fastq ${fastq_pair[0]} ${fastq_pair[1]}
+    """
 }
 
 
@@ -331,27 +350,5 @@ process VELOUR {
     script:
     """
     velour out ${kmer} ${fasta_reads_pair}
-    """
-}
-
-//BBAP
-process BBAP {
-
-    tag { sample_id }
-    publishDir 'results/bbap/', pattern: '*.fasta'
-
-    input:
-    set sample_id, file(fastq_pair) from IN_BBAP
-
-    output:
-    file('*.fasta')
-
-    script:
-    """
-    gunzip -c ${fastq_pair[0]} > reads_1.fq
-    gunzip -c ${fastq_pair[1]} > reads_2.fq
-
-    perl /NGStools/BBAP/QC_SB_AC_masterPipeline.pl -p /NGStools/BBAP/ -F 1 -o ${sample_id}_BBAP -O . \
-    -b /NGStools/ncbi-blast-2.9.0+/ -a $task.cpus -1 reads_1.fq -2 reads_2.fq
     """
 }
