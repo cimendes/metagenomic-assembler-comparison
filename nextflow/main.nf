@@ -246,7 +246,7 @@ process SKESA {
 process PANDASEQ {
 
     tag { sample_id }
-    publishDir 'results/pandaseq/$sample_id', pattern: 'assembly.fasta'
+    publishDir 'results/pandaseq'
 
     input:
     set sample_id, file(fastq_pair) from IN_PANDASEQ
@@ -259,6 +259,7 @@ process PANDASEQ {
     cp -r /NGStools/pandaseq pandaseq/
 
     ./pandaseq/pandaseq -T $task.cpus -w ${sample_id}_pandaseq.fasta -f ${fastq_pair[0]} -r ${fastq_pair[1]}
+    rm pandaseq
     """
 }
 
