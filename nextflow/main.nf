@@ -259,12 +259,12 @@ process PANDASEQ {
     cp -r /NGStools/pandaseq pandaseq/
 
     ./pandaseq/pandaseq -T $task.cpus -w ${sample_id}_pandaseq.fasta -f ${fastq_pair[0]} -r ${fastq_pair[1]} -B
-    rm pandaseq
+    rm -r pandaseq
     """
 }
 
 
-// VelvetOptimizer
+// VelvetOptimizerl
 process VELVETOPTIMIZER {
     tag { sample_id }
     publishDir 'results/velvet_optimiser/', pattern: '*fasta'
@@ -330,7 +330,7 @@ IN_minLen = Channel.value(params.minLength)
 process FILTER_ASSEMBLY {
 
     tag {sample_id}
-    publishDir ' /results/filtered/'
+    publishDir 'results/filtered/'
 
     input:
     set sample_id, file(assembly) from IN_FILTER
