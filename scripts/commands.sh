@@ -28,7 +28,7 @@ srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shi
 
 # MAPPING
 srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shifter --image=cimendes/minimap2:2.17-1
-minimap2 -c -t 16 -r 10000 -g 10000 -x asm20 --eqx --secondary=no $file out_ERR2935805/final.contigs.fa > ERR2935805_$(basename $file).paf
+minimap2 -c -t 4 -r 10000 -g 10000 -x asm20 --eqx --secondary=no $file out_ERR2935805/final.contigs.fa > ERR2935805_$(basename $file).paf
 
 
 srun --pty --nodes=1 --tasks-per-node=1 --cpus-per-task=16 --mem-per-cpu=2GB shifter --image=cimendes/metaspades:11.10.2018-1
@@ -51,3 +51,6 @@ spades.py -o out -t 16 --only-assembler --careful -1 mockSample_fwd_shuffled.fas
 
 
 minimap2 -x sr --secondary=no ../final.contigs.fa /home/cimendes/Binning_assessment/Mock_in_silico/mockSample_fwd_shuffled.fastq /home/cimendes/Binning_assessment/Mock_in_silico/mockSample_rev_shuffled.fastq
+
+
+for file in $(ls *.fasta); do filename="${file%%.*}"; minimap2 -c -t 4 -r 10000 -g 10000 -x asm20 --eqx --secondary=no /home/ines/git/metagenomic-assembler-comparison/data/references/Zymos_Genomes_triple_chromosomes.fasta $file > ${filename}.paf; done

@@ -37,7 +37,7 @@ checkpointClear = Channel.value(clear)
 
 
 // SET CHANNELS FOR ASSEMBLERS
-IN_fastq_raw.into{ IN_BCALM2; IN_GATB_MINIA; IN_MEGAHIT; IN_METASPADES; IN_UNICYCLER; IN_IDBA; IN_SPADES; IN_SKESA; IN_VELOUR; IN_VELVETOPTIMIZER; IN_PANDASEQ; IN_BBAP }
+IN_fastq_raw.into{ IN_BCALM2; IN_GATB_MINIA; IN_MINIA; IN_MEGAHIT; IN_METASPADES; IN_UNICYCLER; IN_IDBA; IN_SPADES; IN_SKESA; IN_VELOUR; IN_VELVETOPTIMIZER; IN_PANDASEQ; IN_BBAP }
 
 
 // BCALM 2
@@ -111,6 +111,32 @@ process GATBMINIAPIPELINE {
     """
 }
 
+// MINIA
+IN_MINIA_kmer = Channel.value(params.miniakmer)
+process MINIA {
+
+    tag {sample_id}
+    publishDir 'results/MINIA/'
+
+    input:
+    set sample_id, file(fastq) from IN_MINIA
+    val kmer from IN_MINIA_kmer
+
+    output:
+    set sample_id, file('*_minia.fasta') into OUT_MINIA
+
+    script:
+    """
+    ls -1 $fastq  > list_reads
+
+    minia -in list_reads -out ${sample_id}_minia.fasta -nb-cores $task.cpu
+
+    mv ${sample_id}_minia.fasta.contigs.fa ${sample_id}_minia.fasta
+
+    rm list_reads *.unitigs.* *.h5
+    """
+}
+
 
 // MEGAHIT
 
@@ -126,12 +152,12 @@ process MEGAHIT {
     val kmers from IN_megahit_kmers
 
     output:
-    set sample_id, file('*_megahit.fasta') into OUT_MEGAHIT
+    set sample_id, file('*_MEGAHIT.fasta') into OUT_MEGAHIT
 
     script:
     """
     /NGStools/megahit/bin/megahit --num-cpu-threads $task.cpus -o megahit --k-list $kmers -1 ${fastq_pair[0]} -2 ${fastq_pair[1]}
-    mv megahit/final.contigs.fa ${sample_id}_megahit.fasta
+    mv megahit/final.contigs.fa ${sample_id}_MEGAHIT.fasta
     rm -r megahit
     """
 
@@ -310,12 +336,12 @@ process IDBA {
     set sample_id, file(fasta_reads_single) from  REFORMAT_IDBA
 
     output:
-    set sample_id, file('*_idba.fasta') into OUT_IDBA
+    set sample_id, file('*_IDBA-UD.fasta') into OUT_IDBA
 
     script:
     """
     idba_ud -l ${fasta_reads_single} --num_threads $task.cpus -o .
-    mv contig.fa ${sample_id}_idba.fasta
+    mv contig.fa ${sample_id}_IDBA-UD.fasta
     rm begin align-* contig-* graph-* kmer local-*
     """
 }
@@ -323,7 +349,7 @@ process IDBA {
 
 // FILTER_ASSEMBLY
 TO_FILTER = Channel.create()
-IN_FILTER = TO_FILTER.mix(OUT_BCALM2, OUT_GATB, OUT_MEGAHIT, OUT_METASPADES, OUT_UNICYCLER, OUT_SPADES, OUT_SKESA, OUT_PANDASEQ, OUT_VELVETOPTIMIZER, OUT_IDBA)
+IN_FILTER = TO_FILTER.mix(OUT_BCALM2, OUT_GATB, OUT_MINIA, OUT_MEGAHIT, OUT_METASPADES, OUT_UNICYCLER, OUT_SPADES, OUT_SKESA, OUT_PANDASEQ, OUT_VELVETOPTIMIZER, OUT_IDBA)
 
 IN_minLen = Channel.value(params.minLength)
 

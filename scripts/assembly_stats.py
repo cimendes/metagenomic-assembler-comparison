@@ -72,11 +72,11 @@ def main():
         aligned_bp_all.append(aligned_bp)
 
     print(','.join(
-        ["assembler", "mean contiguity", "contiguity std", " mean identity", "% aligned contigs",
+        ["assembler", "mean contiguity", "contiguity std", "mean breadth of coverage", " mean identity", "% aligned contigs",
          "% aligned bp"]), file=sys.stderr)
 
-    result = [assembler, f'{mean(contiguity_all):.4f}', f'{pstdev(contiguity_all):.4f}', f'{mean(identity_all):.4f}',
-              f'{sum(aligned_contigs_all)/contigs:.4f}', f'{sum(aligned_bp_all)/size:.4f}']
+    result = [assembler, f'{mean(contiguity_all):.4f}', f'{pstdev(contiguity_all):.4f}', f'{mean(coverage_all):.4f}',
+              f'{mean(identity_all):.4f}', f'{sum(aligned_contigs_all)/contigs:.4f}', f'{sum(aligned_bp_all)/size:.4f}']
 
     print(','.join(result), file=sys.stderr)
 
