@@ -32,6 +32,7 @@ def fasta_iter(fasta_name):
             seq = "".join(s.strip() for s in faiter.__next__())
         except StopIteration:
             print(headerStr)
+
         yield (headerStr, seq)
 
 

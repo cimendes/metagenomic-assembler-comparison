@@ -16,7 +16,7 @@ with no arguments to get the header line.
 import re
 import sys
 from itertools import groupby
-from statistics import mean, pstdev
+from statistics import mean
 
 
 def main():
@@ -46,11 +46,9 @@ def main():
 
     contigs, size = get_assembly_stats(assembly_filename)
 
-    #print(contigs, size)
-
     # print specific file header to stdout.
     print(','.join(["reference", "reference length", "contiguity", "identity", "lowest identity",
-                     "breadth of coverage", "aligned contigs", "aligned bp"]))
+                    "breadth of coverage", "aligned contigs", "aligned bp"]))
 
     for header in entry:
 
@@ -60,8 +58,8 @@ def main():
 
         contiguity, identity, lowest_window_identity, coverage, na50, aligned_seq, aligned_bp = get_alignment_stats(paf_filename, header_str, len(seq)/3)
 
-        print(','.join([header_str, f'{len(seq)/3}', f'{contiguity:.4f}', f'{identity:.4f}', f'{lowest_window_identity:.4f}',
-                         f'{coverage:.4f}', f'{aligned_seq}', f'{aligned_bp}']))
+        print(','.join([header_str, f'{len(seq)/3}', f'{contiguity:.4f}', f'{identity:.4f}',
+                        f'{lowest_window_identity:.4f}', f'{coverage:.4f}', f'{aligned_seq}', f'{aligned_bp}']))
 
         contiguity_all.append(contiguity)
         identity_all.append(identity)
@@ -72,16 +70,13 @@ def main():
         aligned_bp_all.append(aligned_bp)
 
     print(','.join(
-        ["assembler", "mean contiguity", "contiguity std", "mean breadth of coverage", " mean identity", "% aligned contigs",
+        ["assembler", "mean breadth of coverage", " mean identity", "% aligned contigs",
          "% aligned bp"]), file=sys.stderr)
 
-    result = [assembler, f'{mean(contiguity_all):.4f}', f'{pstdev(contiguity_all):.4f}', f'{mean(coverage_all):.4f}',
+    result = [assembler, f'{mean(coverage_all):.4f}',
               f'{mean(identity_all):.4f}', f'{sum(aligned_contigs_all)/contigs:.4f}', f'{sum(aligned_bp_all)/size:.4f}']
 
     print(','.join(result), file=sys.stderr)
-
-    #print(sum(aligned_contigs_all))
-    #print(contigs, aligned_contigs_all, sum(aligned_contigs_all)/contigs)
 
 
 def get_alignment_stats(paf_filename, ref_name, ref_length):
@@ -118,8 +113,7 @@ def get_alignment_stats(paf_filename, ref_name, ref_length):
     coverage = covered_bases / ref_length
     lowest_window_id = get_lowest_window_identity(longest_alignment_cigar, 1000)
 
-    return relative_longest_alignment, longest_alignment_id, lowest_window_id, coverage, NA50, \
-           len(alignment_lengths), sum(alignment_lengths)
+    return relative_longest_alignment, longest_alignment_id, lowest_window_id, coverage, NA50, len(alignment_lengths), sum(alignment_lengths)
 
 
 def get_lowest_window_identity(cigar, window_size):

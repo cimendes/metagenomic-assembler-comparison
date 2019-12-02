@@ -54,3 +54,5 @@ minimap2 -x sr --secondary=no ../final.contigs.fa /home/cimendes/Binning_assessm
 
 
 for file in $(ls *.fasta); do filename="${file%%.*}"; minimap2 -c -t 4 -r 10000 -g 10000 -x asm20 --eqx --secondary=no /home/ines/git/metagenomic-assembler-comparison/data/references/Zymos_Genomes_triple_chromosomes.fasta $file > ${filename}.paf; done
+
+bbsplit.sh in=../fastq/ERR2935805_1.fq.gz in2=../fastq/ERR2935805_2.fq.gz ref=Escherichia_coli_plasmid.fa,Staphylococcus_aureus_plasmid1.fa,Staphylococcus_aureus_plasmid2.fa,Staphylococcus_aureus_plasmid3.fa,Cryptococcus_neoformans_draft_genome.fasta,Saccharomyces_cerevisiae_draft_genome.fa basename=bbsplit%.fq.gz out1=bbsplit_ERR2935805_1.fq.gz out2=bbsplit_ERR2935805_2.fq.gz

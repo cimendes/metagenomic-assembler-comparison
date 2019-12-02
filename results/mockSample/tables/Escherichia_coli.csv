@@ -1,0 +1,13 @@
+Assembler,Breadth of coverage,Contigs
+BCALM2,0.3251,1048
+GATBMiniaPipeline,0.9724,130
+IDBA-UD,0.956,423
+MEGAHIT,0.9521,136
+metaSPAdes,0.9727,99
+minia,0.9744,168
+PANDAseq,-,-
+SKESa,0.8952,775
+SPAdes,0.973,128
+unicycler,0.9621,113
+VelvetOptimizer,0.9157,206
+Golden Standard,1,1
