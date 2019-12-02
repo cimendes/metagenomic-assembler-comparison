@@ -17,19 +17,20 @@ def fasta_iter(fasta_name):
     Correct Way To Parse A Fasta File In Python
     given a fasta file. yield tuples of header, sequence
     """
-    "first open the file outside "
     fh = open(fasta_name)
 
     # ditch the boolean (x[0]) and just keep the header or sequence since
+    # we know they alternate.
     faiter = (x[1] for x in groupby(fh, lambda line: line[0] == ">"))
 
     for header in faiter:
-        headerStr = header.__next__()[1:].strip()  # drop the ">"
+        # drop the ">"
+        headerStr = header.__next__()[1:].strip()
 
         # join all sequence lines to one.
         try:
             seq = "".join(s.strip() for s in faiter.__next__())
-        except StopIteration:  # some multifasta break here for some reason
+        except StopIteration:
             print(headerStr)
         yield (headerStr, seq)
 
@@ -59,12 +60,14 @@ def main():
     data_to_plot = []
     legends = []
 
-    print(','.join(['Assembler', 'n Contigs', 'total bp', 'max contig size', 'n50', '% contigs>1000bp',
+    print(','.join(['Assembler', 'n Contigs', 'total bp', 'max contig size', 'n50',
+                    'contigs>1000bp', '% contigs>1000bp', ' bp in contigs>1000bp',
                     '% bp in contigs>1000bp', 'n50 in contigs>1000bp']))
 
     for file in assembly_filename:
 
-        contig_len_log = []  # unused
+        filename = file.split('.')[0].rsplit('_')[-1]
+
         contig_len = []
         total_bp = 0
         good_contigs = []
@@ -76,15 +79,13 @@ def main():
                 good_contigs.append(len(seq))
                 bp_in_good_contigs += len(seq)
             contig_len.append(len(seq))
-            contig_len_log.append(log(len(seq)))  # log scale
             total_bp += len(seq)
 
-        data_to_plot.append(contig_len)
-        legends.append(file.split('.')[0].rsplit('_')[1])
+        data_to_plot.append(good_contigs)
+        legends.append(filename)
 
-        print(','.join([file.split('.')[0].rsplit('_')[1], f'{len(contig_len):.4f}', f'{total_bp}',
-                        f'{max(contig_len):.4f}', f'{get_n50(contig_len)}',
-                        f'{len(good_contigs)/len(contig_len):.4f}',
+        print(','.join([filename, f'{len(contig_len)}', f'{total_bp}', f'{max(contig_len)}', f'{get_n50(contig_len)}',
+                        f'{len(good_contigs)}', f'{len(good_contigs)/len(contig_len):.4f}', f'{bp_in_good_contigs}',
                         f'{bp_in_good_contigs/total_bp:.4f}', f'{get_n50(good_contigs)}']))
 
     # Create plot
@@ -93,7 +94,7 @@ def main():
     for data, title in zip(data_to_plot, legends):
         fig.add_trace(go.Box(y=data, name=title, boxpoints='outliers', boxmean=True, marker_color='rgb(8, 81, 156)'))
     fig.update_layout(showlegend=False, yaxis_type="log", yaxis_title="Contig size (bp)",
-                      title="Contig size distribution per assembler.")
+                      title="Contig size distribution per assembler (contigs over 10000 bp)")
     plot(fig)
 
 
