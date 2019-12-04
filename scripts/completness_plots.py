@@ -19,7 +19,7 @@ import plotly.figure_factory as ff
 def get_file_names(files):
     result = []
     for file in files:
-        result.append(os.path.basename(file).split('.')[0].replace('_', ' '))
+        result.append('<i>' + os.path.basename(file).split('.')[0].replace('_', ' ') + '</i>')
     return result
 
 
@@ -48,8 +48,8 @@ def main():
     r = 1
     c = 1
     # colors for each subplot
-    colors = ['#abd9e9', '#80cdc1', '#d6604d', '#4575b4', '#006837', '#fee090',
-              '#bababa', '#b2abd2', '#66bd63', '#a50026', '#d73027', '#fdae61']
+    colors = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c',
+              '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928']
 
     # call Cthulhu and beg him to make this work
     for file in csv_tables:
