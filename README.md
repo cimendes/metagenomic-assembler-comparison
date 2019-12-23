@@ -1,100 +1,116 @@
 #  Benchmarking of de novo metagenomic assembly software
 
-While searching for a benchmark with relevant metagenomic assembly software, I gave up and decided to make my own. WORK IN PROGRESS 
+ :warning: WORK IN PROGRESS :warning:
 
 ## Table of Contents
 
 * [Introduction](#introduction)
 * [Methods](#methods)
-    * [Metagenomic Dataset](#metagenomic-datasets)
-        * [simulated dataset](#simulated-dataset)
-        * [Zymos community standard](#zymos-community-standard)
-        * [Real dataset](#real-dataset)
-    * [Assembly softwares and commands](#assembly-softwares-and-commands)
-        * [IDBA-UD](#idba-ud)
-        * [MegaGTA](#megagta)
+    * [de novo Assembly tools](#de-novo-assembly-tools)
+        * [bcalm2](#bcalm2)
+        * [GATB-Minia Pipeline](#gatb-minia-pipeline)
+        * [Minia](#minia)
+        * [Unicycler](#unicycler)
         * [MEGAHIT](#megahit)
-        * [Snowball](#snowball)
-        * [SPAdes](#spades)
         * [MetaSPAdes](#metaspades)
+        * [SPAdes](#spades)
         * [SKESA](#skesa)
-        * [Xander](#xander)
+        * [PANDAseq](#pandaseq)
+        * [VelvetOptimier](#velvetoptimier)
+        * [IDBA-UD](#idba-ud)
+    * [Metagenomic datasets](#metagenomic-datasets)
+        * [Zymobiomics Community Standard](#zymobiomics-community-standard)
+        * [BMock12](#bmock12)
     * [Assessing Metagenomic Assembly Success](#assessing-metagenomic-assembly-success)
         * [Assembly Continuity](#assembly-continuity)
+        * [Chimera Assessment](#chimera-assessment)
 * [Results](#resuls)
+    * [Zymobiomics Community Standard](#zymobiomics-community-standard)
+        * [Mock Community](#mock-community)
+        * [Even distributed](#even-distributed)
+        * [Log distributed](#log-distributed)
 * [Authors](#authors)
 
 ## Introduction
 
-TODO
+Shotgun metagenomics offers relatively unbiased pathogen detection and characterization in a single methodological step, 
+with the drawbacks of increased data volume and complexity, requiring expert handling and appropriate infrastructure. 
+
+The most common strategy for analysing metagenomic data is through *de novo* assembly followed by a combination of 
+different tools for characterization. This approach creates longer sequences, which are more informative and can provide 
+better insights into the structure of microbial communities. Several dedicated metagenomic assembly tools are available. 
+These tools apply strategies that promise better handling of intragenomic and intergenomic repeats and uneven sequencing 
+coverage when compared to traditional genome assemblers. However, there are no comprehensive benchmarks focusing on the 
+performance of these tools. 
+
+To assess the performance and limitations of currently available de novo assembly algorithms, we propose a benchmarking
+of currently available and recently mantained *de novo* assembly tools, both traditional and dedicated for metagenomic 
+data. 
+
+We've compiled a list of 24 different *de novo* assembly tools, including 5 implementing Overlap, Layout and Consensus  
+(OLC) assembly algorithm, 18 De Bruijn graph assemblers, of which 10 are single k-mer value assemblers and 8 implement
+a multiple k-mer value approach, and a hybrid assembler using both OLC and single k-mer De Bruijn algorythms. Of these, 
+12 were developed explicitly to handle metagenomic data. The complete list is available [as a google sheet](https://docs.google.com/spreadsheets/d/1d4x1IEivbe-Gk3PGmWRY5IgqpiC_mjji3846zDNYCtI/edit?usp=sharing).
 
 ## Methods
 
-### Metagenomic datasets
+### *de novo* Assembly tools
 
-#### Simulated dataset
-With the [M3S3 tool](http://medweb.bgu.ac.il/m3s3/), a simulation sample was obtained made up of the Zymobiomics 
-microbial community standasrd species of bacteria and yeast. The sample has the following composition (obtained with 
-Kraken2 with the minimkaken2_V1 database):
-<p align="center">
-  <img width="360" src="figures/ZymoBIOMICS_std_report.kraken2.bracken2.pie.png" alt="zymos_zimulated_kraken2"/>
-</p>
+To assess the performance and limitations of currently available *de novo* assembly algorithms, we benchmarked 11 
+assemblers, including traditional and dedicated metagenomic assemblers, both using OLC, and De Bruijn with single and 
+multiple k-mer values. The creteria was based on date of last update. 
 
-#### Zymos community Standard
-Two commercially available mock communities containing 10 microbial species (ZymoBIOMICS Microbial Community Standards) 
-were sequences by [Nicholls et al. 2019](https://academic.oup.com/gigascience/article/8/5/giz043/5486468). Shotgun 
-sequencing of the Even and Log communities was performed with the same protocol, with the exception that the Log 
-community was sequenced individually on 2 flowcell lanes and the Even community was instead sequenced on an Illumina 
-MiSeq using 2×151 bp (paired-end) sequencing. They are available under accession numbers 
-[ERR2984773](https://www.ebi.ac.uk/ena/data/view/ERR2984773) (even) and 
-[ERR2935805](https://www.ebi.ac.uk/ena/data/view/ERR2935805).
+The benchmarked assembly tools include 7 traditional - bcalm2, Minia, Unicycler, SPAdes, Skesa, PANDAseq and 
+VelvetOptimizer - and 4 dedicated for metagenomic data - GATB-Minia Pipeline, MEGAHIT, MetaSPAdes, and IDBA-UD.
 
-#### Real dataset
-As a real metagenomic dataset, the three CAMI synthetic metagenome challenge sets was used (Low (L), Medium with 
-differential abundance (M), and High complexity with time series (H)). These datasets are publicly available in 
-[GigaDB](http://gigadb.org/dataset/100344). 
+Docker containers for all assemblers were created, and the corresponding docker files can be found in the `docker/` 
+repository.   
 
-### Assembly softwares and commands
+An assembly pipeline to perform concorrent assemblies with all tools in the benchmark was developed, in [Nextflow](https://www.nextflow.io/),
+and it's available in the `nextflow/` directory of this repository. All resulting assemblies are filtered for a minimum 
+contig length of 1000bp. 
 
-[Ayling et al. 2019](https://academic.oup.com/bib/advance-article/doi/10.1093/bib/bbz020/5363831) published recently a 
-review on the different approaches for metagenome assembly with short reads, compiling an exhaustive table describing 
-the most of [metagenomic assembly tools available](https://academic.oup.com/view-large/131667617). 
-A total 17 tools are presented. Of these, [IVA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4495290/) and 
-[SAVAGE](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5411778/) were aimed at viruses. Additionally, [Genovo's](https://www.liebertpub.com/doi/abs/10.1089/cmb.2010.0244?rfr_dat=cr_pub%3Dpubmed&url_ver=Z39.88-2003&rfr_id=ori%3Arid%3Acrossref.org&journalCode=cmb) 
-and [MAP's](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/bts162) source codes are 
-no longer available, [VICUNA](https://www.broadinstitute.org/viral-genomics/viral-genomics-analysis-software-registration) 
-requires registration and cannot be executed locally, and [Omega](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btu395) 
-is an assembly pipeline. [MegaGTA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5657035/), [Snowball]() and [Xander]() are not *de novo* assemblers, performing instead guided 
-assembly targeting specific genes, that falls outside the scope of this review. Of the remaining tools, [BBAP](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5406902/), 
-[MetaVelvet](http://metavelvet.dna.bio.keio.ac.jp/), [PRICE](http://derisilab.ucsf.edu/software/price/) and 
-[Ray Meta](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2012-13-12-r122) are also excluded due to no 
-update since 2015. 
+The assembly performance is evaluated through mapping of the obtained assemblies to the reference sequences, with
+[minimap2](https://github.com/lh3/minimap2). The assessment of the quality of the assembly is done after computation of
+the percentage of mapped contigs, contiguity, average identity, and breadth of coverage. Assembly statistics, such as 
+number of basepairs, number of contigs and N50 were also determined for each assembler. The scripts developed for this
+are available in the `scripts/` directory, including the mapping commands. 
+Performance metrics such as average run time, max memory usage, and average data read and written, are obtained through 
+the Nextflow pipeline.
 
-The following tools will be tested:
+#### bcalm2
+This assembler, publiched by [Chikhi et al, 2016](https://academic.oup.com/bioinformatics/article/32/12/i201/2289008) 
+in *Bioinformatics*, is a fast and low memory algorithm for graph compaction, consisting of three stages: careful 
+distribution of input k-mers into buckets, parallel compaction of the buckets, and a parallel reunification step to 
+glue together the compacted strings into unitigs. It's a traditional single k-mer value De Bruijn assembler.
+* Source code: [https://github.com/GATB/bcalm](https://github.com/GATB/bcalm)
+* Date of last update: 06/10/2019
+* Container: `cimendes/bcalm:2.2.1-1`
 
-#### IDBA-UD :skull:
-Published by [Peng et al. 2012](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/bts174), 
-it's a De Brujin graph assembler for assembling reads from single-cell sequencing or metagenomic sequencing technologies 
-with uneven sequencing depths. It employs multiple depth relative thresholds to remove erroneous k-mers in both 
-low-depth and high-depth regions. The technique of local assembly with paired-end information is used to solve the 
-branch problem of low-depth short repeat regions. To speed up the process, an error correction step is conducted to 
-correct reads of high-depth regions that can be aligned to high confidence contigs. 
-The latest version is available at https://github.com/loneknightpy/idba, and an official docker image at
-https://hub.docker.com/r/loneknightpy/idba
-Last update: 31/12/2016 (GitHub)
+#### GATB-Minia Pipeline
+GATB-Minia is an assembly pipeline, still unpublished, that consists Bloocoo for error correction,  Minia 3 for contigs 
+assembly, which is based on the BCALM2 assembler, and the BESST for scaffolding. It was developed to extend Minia 
+assembler to use multiple k-mer values. It was developed to extend the [Minia](#minia) assembler to use De Bruijn 
+algorithm with multiple k-mer values. It's explicit for metagenomic data. 
+* Source code: [https://github.com/GATB/gatb-minia-pipeline](https://github.com/GATB/gatb-minia-pipeline)
+* Date of last update: 17/09/2019
+* Container: `cimendes/gatb-minia-pipeline:17.09.2019-1`
 
-docker container: `oneknightpy/idba:latest`
-command: ``
+#### Minia
+This tool, published by [Chikhi & Rizk, 2013](https://almob.biomedcentral.com/articles/10.1186/1748-7188-8-22) in 
+*Algorithms for Molecular Biology, performs the assembly on a data structure based on unitigs produced by the 
+BCALM software and using graph simplifications that are heavily inspired by the [SPAdes](#spades) assembler.
+* Source code: [https://github.com/GATB/gatb-minia-pipeline](https://github.com/GATB/gatb-minia-pipeline)
+* Date of last update: 17/09/2019
+* Container: `cimendes/gatb-minia-pipeline:17.09.2019-1`
 
-#### MetaVelvet-SL :skull:
-This De Brujin graph assembler, published by [](), works similarly to [MetaVelvet](http://metavelvet.dna.bio.keio.ac.jp/) 
-by assemblying the data by populating a structure estimated from the coverage of nodes (poisson distributions). The De 
-Brujin graph is partitioned into hypothetical subgraphs (possible different species) using these distributions as a 
-guide. Differently from MetaVelvet, MetaVelvet-SL identifies chimeric contigs though a support-vector machine (SVM) 
-trained on paired-end, converage, and contig lenghts for each dinucleotide and passed on to the De Brujin graph for 
-decomposition. 
-
-docker container: `cimendes/metavelvet-sl:1.2.02-1`
+#### Unicycler
+An assembly pipeline for bacterial genomes that can do long-read assembly, hybrid assembly and short-read assembly. 
+When asseblying Illumina-only read sets where it functions as a SPAdes-optimiser, using a De Bruijn 
+algorithm with multiple k-mer values. It was published by [Wick et al. 2017](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005595).
+* Source code: [https://github.com/rrwick/Unicycler](https://github.com/rrwick/Unicycler)
+* Date of last update: 16/08/2019
+* Container: `cimendes/unicycler:0.4.8-1`
 
 #### MEGAHIT
 MEGAHIT, published by [Li et al. 2015](https://academic.oup.com/bioinformatics/article/31/10/1674/177884), *de novo* 
@@ -102,45 +118,92 @@ assembler for assembling large and complex metagenomics data in a time- and cost
 succinct de Bruijn graph, with a a multiple k-mer size strategy. In each iteration, MEGAHIT cleans potentially erroneous 
 edges by removing tips, merging bubbles and removing low local coverage edges,specially useful for metagenomics which 
 suffers from non-uniform sequencing depths. 
-The latest version is available at https://github.com/voutcn/megahit
-Last update: 12/08/2019 (GitHub)
+* Source code: [https://github.com/voutcn/megahit](https://github.com/voutcn/megahit)
+* Date of last update: 12/08/2019
+* Container: `cimendes/megahit-assembler:12.08.19-1`
 
-docker container: `cimendes/megahit-assembler:12.08.19-1`
-command: `megahit -1 read_1.fq.gz -2 read_2.fq.gz -o out -t 16`
+#### MetaSPAdes
+[SPAdes](#spades) started out as a tool aiming to resolve uneven coverage in single cell genome data, but later metaSPAdes was 
+released, building specific metagenomic pipeline on top of [SPAdes](#spades). It was published by [Nurk et al. 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5411777/), 
+and like SPAdes, it uses multiple k-mer sizes of de Bruijn graph, starting with lowest kmer size and adding hypothetical 
+kmers to connect graph. It's available at http://cab.spbu.ru/software/spades/ and https://github.com/ablab/spades
+* Source code: [http://cab.spbu.ru/software/spades/](http://cab.spbu.ru/software/spades/)
+* Date of last update: 12/10/2018
+* Container: `cimendes/metaspades:11.10.2018-1`
 
 #### SPAdes
 A tool aiming to resolve uneven coverage in single cell genome data through multiple k-mer sizes of De Brujin graphs. It
 starts with the smallest k-mer size and and adds hypotetical k-mers to connect graph. 
-Last update: 11/10/2018 (release) and 24/04/2019 (GitHub)
-
-docker container: `cimendes/metaspades:11.10.2018-1`
-command: `spades.py -o out -1 read_1.fq.gz -2 read_2.fq.gz --careful --only-assembler -t 16 -m 32`
-
-#### MetaSPAdes
-SPAdes started out as a tool aiming to resolve uneven coverage in single cell genome data, but later metaSPAdes was 
-released, building specific metagenomic pipeline on top of SPAdes. It was published by [Nurk et al. 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5411777/), 
-and like SPAdes, it uses multiple k-mer sizes of de Bruijn graph, starting with lowest kmer size and adding hypothetical 
-kmers to connect graph. It's available at http://cab.spbu.ru/software/spades/ and https://github.com/ablab/spades
-Last update: 11/10/2018 (release) and 24/04/2019 (GitHub)
-
-docker container: `cimendes/metaspades:11.10.2018-1`
-command: `metaspades.py -o out -1 read_1.fq.gz -2 read_2.fq.gz --only-assembler -t 16 -m 32`
+* Source code: [http://cab.spbu.ru/software/spades/](http://cab.spbu.ru/software/spades/)
+* Date of last update: 12/10/2018
+* Container: `cimendes/metaspades:11.10.2018-1`
 
 #### SKESA
-This *de novo* sequence read assembler is based on DeBruijn graphs and uses conservative heuristics and is designed to
+This *de novo* sequence read assembler is based on De Bruijn graphs and uses conservative heuristics and is designed to
 create breaks at repeat regions in the genome, creating shorter assemblies but with greater sequence quality. It tries
 to obtain good contiguity by using k-mers longer than mate length and up to insert size. It was recently published by
 [Souvorov et al. 2018](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-018-1540-z) and it's available at
 https://github.com/ncbi/SKESA.
-Last update: 09/10/2018 (GitHub)
+* Source code: [https://github.com/ncbi/SKESA/releases](https://github.com/ncbi/SKESA/releases)
+* Date of last update: 09/10/2018
+* Container: `flowcraft/skesa:2.3.0-1`
 
-docker container: `cimendes/`
-command: `skesa --cores 16 --fastq read_1.fq.gz read_2.fq.gz --use_paired_ends > out.fasta`
+#### PANDAseq
+This assembler, published by [Masella et al. 2012] in *BMC Bioinformatics*, implements an OLC algorithm to assemble 
+genomic data. It align Illumina reads, optionally with PCR primers embedded in the sequence, and reconstruct an 
+overlapping sequence. 
+* Source code: [https://github.com/neufeld/pandaseq](https://github.com/neufeld/pandaseq)
+* Date of last update: 30/08/2018
+* Container: `cimendes/pandaseq:2.11-1`
 
+#### VelvetOptimier
+This optimizing pipeline, developed by Torsten Seeman, is still unpublished but extends the original [Velvet]() 
+assembler by performing several assemblies with variable k-mer sizes. It searches a supplied hash value range for the 
+optimum, estimates the expected coverage and then searches for the optimum coverage cutoff. It uses Velvet's internal 
+mechanism for estimating insert lengths for paired end libraries. It can optimise the assemblies by either the default 
+optimisation condition or by a user supplied one. It outputs the results to a subdirectory and records all its 
+operations in a logfile.
+* Source code: [https://github.com/tseemann/VelvetOptimiser](https://github.com/tseemann/VelvetOptimiser)
+* Date of last update: 21/01/2017
+* Container: `cimendes/velvetoptimiser:2.2.6-1`
+
+#### IDBA-UD
+Published by [Peng et al. 2012](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/bts174), 
+it's a De Brujin graph assembler for assembling reads from single-cell sequencing or metagenomic sequencing technologies 
+with uneven sequencing depths. It employs multiple depth relative thresholds to remove erroneous k-mers in both 
+low-depth and high-depth regions. The technique of local assembly with paired-end information is used to solve the 
+branch problem of low-depth short repeat regions. To speed up the process, an error correction step is conducted to 
+correct reads of high-depth regions that can be aligned to high confidence contigs. 
+* Source code: [https://github.com/loneknightpy/idba](https://github.com/loneknightpy/idba)
+* Date of last update: 31/12/2016
+* Container: `cimendes/idba:31.12.2016-3`
+
+
+### Metagenomic datasets
+
+#### Zymobiomics Community Standard
+
+Two commercially available mock communities containing 10 microbial species (ZymoBIOMICS Microbial Community Standards) 
+were sequences by [Nicholls et al. 2019](https://academic.oup.com/gigascience/article/8/5/giz043/5486468). Shotgun 
+sequencing of the **Even and Log communities** was performed with the same protocol, with the exception that the Log 
+community was sequenced individually on 2 flowcell lanes and the Even community was instead sequenced on an Illumina 
+MiSeq using 2×151 bp (paired-end) sequencing. They are available under accession numbers: 
+* [ERR2984773](https://www.ebi.ac.uk/ena/data/view/ERR2984773) (even) 
+* [ERR2935805](https://www.ebi.ac.uk/ena/data/view/ERR2935805) (log)
+
+With the [M3S3 tool](http://medweb.bgu.ac.il/m3s3/), a simulation sample was obtained made up of the Zymobiomics 
+microbial community standasrd species of bacteria (n=8). The sample has the following composition (obtained with 
+Kraken2 with the minimkaken2_V1 database):
+<p align="center">
+  <img width="360" src="figures/ZymoBIOMICS_std_report.kraken2.bracken2.pie.png" alt="zymos_zimulated_kraken2"/>
+</p>
+
+##### BMock12
+:warning:TODO:warning:
+
+### Assessing Metagenomic Assembly Success
  
- ### Assessing Metagenomic Assembly Success
- 
- #### Assembly Continuity 
+#### Assembly Continuity 
  
 [Rick et al. 2019](https://github.com/rrwick/Long-read-assembler-comparison) proposed the use of a triple reference to 
 assess chromosome contiguity while benchmaking long-read genomic assemblers. This measure is the longest single 
@@ -156,82 +219,39 @@ missassembly.
 
 More information is available on [Rick's Assembly Benchmark GitHub page](https://github.com/rrwick/Long-read-assembler-comparison#assessing-chromosome-contiguity)
 
-For each reference in the Zymos community standard, we've generated a chromosomal triple reference. Each metagenomic
-assembly was mapped against the triple chromosome references with [minimap2](https://github.com/lh3/minimap2), published
-by [Li, 2018](https://academic.oup.com/bioinformatics/article/34/18/3094/4994778).
-
-container: `cimendes/minimap2:2.17-1`  
-
-`minimap2 --secondary=no -c -t 16 -r 10000 -g 10000 -x asm20 --eqx data/references/Zymos_Genomes_triple_chromosomes.fasta
- ${sample}_contigs.fa > ${sample}_${reference}.paf`
-
+For each reference in the Zymos community standard, we've generated a chromosomal triple reference, available at 
+`data/refereces/Zymos_Genomes_triple_chromosomes`. Each assembly was mapped against the triple chromosome references
+with [minimap2](https://github.com/lh3/minimap2), published by [Li, 2018](https://academic.oup.com/bioinformatics/article/34/18/3094/4994778).
+using the container `cimendes/minimap2:2.17-1`. 
 Because each metagenomic sample is composed by more than one genome, the contings in the assemblies are mapped against 
 all references and only the best result is kept with `--secondary=no` flag. The resulting mapping file, in 
 [PAF format](https://github.com/lh3/miniasm/blob/master/PAF.md) describes the approximate mapping positions between each
 mapped contig and the reference.
 
-To obtain the contiguity, as well as other assembly statistics such as NA50, N50, number of contigs, number of aligned 
-contigs and aligned basepairs, and breadth of coverage, the `assembly_stats.py` script is used. 
-
-`python assembly_stats.py <assembly.fasta> <paf_file> data/reference/Zymos_Genomes_triple_chromosomes.fasta
-<assembler_name> > <assembler>_stats.tsv 2>> `
+To obtain the mapping statistics, including contiguity, `assembly_stats.py` script is used available in the `scripts/`
+directory. 
 
 ### Chimera Assessment
-
-The metagenomic assembly can produce chimeric contigs when similar sequences belonging to different organisms are 
-assembled togethers. To assess the level of chimeric sequences produced, we've mapped the original sequence data to the 
-resulting assembly. To do that we used minimap2
-
-container: `cimendes/minimap2:2.17-1`  
-
-`minimap2 --secondary=no -x sr --eqx <assembly> <read_1> <read_2> > mapping.paf`
-
-For each assembly, the resulting PAF files are then analysed with the `contig_chimera.py` script.
-
-`python contig_chimera.py mapping.paf`
-
+:warning:TODO:warning:
 
 ## Results
 
-### Simulated dataset
-
-<p align="center">
-  <img width="800" src="figures/MEGAHIT_table.png" alt="MEGAHIT_table"/>
-</p>
-
-<p align="center">
-  <img width="800" src="figures/metaSPAdes_table.png" alt="metaSPAdes_table"/>
-</p>
-
-<p align="center">
-  <img width="800" src="figures/SPAdes_table.png" alt="SPAdes_table"/>
-</p>
-
-<p align="center">
-  <img width="800" src="figures/SKESA_table.png" alt="SKESA_table"/>
-</p>
-
-<p align="center">
-  <img width="800" src="figures/all_assemblers_table.png" alt="all_assemblers_table"/>
-</p>
-
-<p align="center">
-  <img width="800" src="figures/mock_chimeras.png" alt="mock_chimeras"/>
-</p>
-
-<p align="center">
-  <img width="800" src="figures/mock_assembly_violin.png" alt="mock_assembly_violin"/>
-</p>
-
+### Zymobiomics Community Standard
+The results are available in the `results/` directory of this repository.
+:warning:TODO:warning:
+#### Mock Community
+#### Even distributed
+#### Log distributed
 
 ## Authors
-
 * Inês Mendes 
     * Instituto de Microbiologia, Instituto de Medicina Molecular, Faculdade de Medicina, Universidade de Lisboa, 
     Lisboa, Portugal; 
     * University of Groningen, University Medical Center Groningen, Department of Medical Microbiology and Infection 
     Prevention, Groningen, The Netherlands
-
+* Rafael Mamede
+    * Instituto de Microbiologia, Instituto de Medicina Molecular, Faculdade de Medicina, Universidade de Lisboa, 
+    Lisboa, Portugal; 
 * Yair Motro 
     * Department of Health System Management, School of Public Health, Faculty of Health Sciences, Ben-Gurion 
 University of the Negev, Beer-Sheva, Israel.
