@@ -33,7 +33,7 @@ def main():
         print('No files provided. Exiting...')
         sys.exit(0)
 
-    num_cols = 3
+    num_cols = 2
     num_rows = len(csv_tables)/num_cols
     num_rows = int(num_rows) if len(csv_tables)%num_cols == 0 else int(num_rows)+1
 
@@ -77,7 +77,7 @@ def main():
                                 mode='markers',
                                 marker=dict(color=colors[a],
                                             size=7,
-                                            line=dict(width=1,color='black'))
+                                            line=dict(width=1, color='black'))
                                 )
 
             tracers.append(tracer)

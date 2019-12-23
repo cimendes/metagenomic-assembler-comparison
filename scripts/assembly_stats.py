@@ -56,7 +56,7 @@ def main():
         seq = "".join(s.strip() for s in entry.__next__())
 
 
-        contiguity, identity, lowest_window_identity, coverage, na50, aligned_seq, aligned_bp = get_alignment_stats(paf_filename, header_str, len(seq)/3)
+        contiguity, identity, lowest_window_identity, coverage, na50, aligned_seq, aligned_bp = get_alignment_stats(paf_filename, header_str, len(seq)) # devide by 3 for triple reference
 
         print(','.join([header_str, f'{len(seq)/3}', f'{contiguity:.4f}', f'{identity:.4f}',
                         f'{lowest_window_identity:.4f}', f'{coverage:.4f}', f'{aligned_seq}', f'{aligned_bp}']))
@@ -86,7 +86,7 @@ def get_alignment_stats(paf_filename, ref_name, ref_length):
     longest_alignment_id = 0
     longest_alignment_cigar = ''
 
-    covered_bases = 0
+    covered_bases = []  # dealing with overlapping regions :(
 
     # to calculate na50
     alignment_lengths = []
@@ -105,15 +105,33 @@ def get_alignment_stats(paf_filename, ref_name, ref_length):
                     longest_alignment_id = matching_bases / total_bases
                     longest_alignment_cigar = cigar
                 longest_alignment = max(longest_alignment, end - start)
-                covered_bases += end - start
+                covered_bases.append([start, end])
 
     NA50 = get_NA50(alignment_lengths)
 
     relative_longest_alignment = longest_alignment / ref_length
-    coverage = covered_bases / ref_length
+    coverage = get_covered_bases(covered_bases, ref_length)
     lowest_window_id = get_lowest_window_identity(longest_alignment_cigar, 1000)
 
     return relative_longest_alignment, longest_alignment_id, lowest_window_id, coverage, NA50, len(alignment_lengths), sum(alignment_lengths)
+
+
+def get_covered_bases(covered_bases_list, ref_len):
+    sorted_list = sorted(covered_bases_list, key=lambda x: x[0])
+
+    covered_bases = 0
+    to_remove = 0
+    old_values = [0, 0]
+
+    for item in sorted_list:
+        new_values = [item[0], item[1]]
+        covered_bases += new_values[1] - new_values[0]
+        if old_values[1] > new_values[0]:
+            to_remove += old_values[1] - new_values[0]
+        old_values = new_values
+    #print(covered_bases, ref_len, covered_bases / ref_len)
+    #print(covered_bases - to_remove, ref_len, (covered_bases - to_remove) / ref_len)
+    return covered_bases / ref_len
 
 
 def get_lowest_window_identity(cigar, window_size):
