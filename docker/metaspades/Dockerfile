@@ -11,8 +11,8 @@ RUN apt-get -y install zlib1g-dev libbz2-dev
 
 WORKDIR /NGStools
 
-RUN wget https://github.com/ablab/spades/archive/spaligner-paper.tar.gz
-RUN tar xf spaligner-paper.tar.gz && rm spaligner-paper.tar.gz
-RUN mv spades-spaligner-paper spades
-RUN cd spades/assembler && sh spades_compile.sh
-ENV PATH="/NGStools/spades/assembler:$PATH"
+RUN wget https://github.com/ablab/spades/releases/download/v3.14.0/SPAdes-3.14.0.tar.gz
+RUN tar xf SPAdes-3.14.0.tar.gz && rm SPAdes-3.14.0.tar.gz
+RUN mv SPAdes-3.14.0 spades
+RUN cd spades/ && sh spades_compile.sh
+ENV PATH="/NGStools/spades:$PATH"
