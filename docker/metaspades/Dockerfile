@@ -14,5 +14,4 @@ WORKDIR /NGStools
 RUN wget https://github.com/ablab/spades/releases/download/v3.14.0/SPAdes-3.14.0.tar.gz
 RUN tar xf SPAdes-3.14.0.tar.gz && rm SPAdes-3.14.0.tar.gz
 RUN mv SPAdes-3.14.0 spades
-RUN cd spades/ && sh spades_compile.sh
-ENV PATH="/NGStools/spades:$PATH"
+ENV PATH="/NGStools/spades/bin:$PATH"
