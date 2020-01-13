@@ -9,6 +9,8 @@ WORKDIR /NGStools
 RUN wget https://github.com/neufeld/pandaseq/archive/v2.11.tar.gz
 RUN tar xf v2.11.tar.gz && rm v2.11.tar.gz
 RUN cd pandaseq-2.11 && ./autogen.sh && ./configure && make && make install
+RUN mv pandaseq-2.11 pandaseq
+RUN ldconfig
 
-ENV PATH="/NGStools/pandaseq-2.11:$PATH"
+ENV PATH="/NGStools/pandaseq:$PATH"
 
