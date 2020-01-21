@@ -62,8 +62,8 @@ def main():
     legends = []
 
     print(','.join(['Assembler', 'n Contigs', 'total bp', 'max contig size', 'n50',
-                    'contigs>1000bp', '% contigs>1000bp', ' bp in contigs>1000bp',
-                    '% bp in contigs>1000bp', 'n50 in contigs>1000bp']))
+                    'contigs>1000bp (%)', ' bp in contigs>1000bp (%)',
+                    'n50 in contigs>1000bp']))
 
     for file in assembly_filename:
 
@@ -86,8 +86,8 @@ def main():
         legends.append(filename)
 
         print(','.join([filename, f'{len(contig_len)}', f'{total_bp}', f'{max(contig_len)}', f'{get_n50(contig_len)}',
-                        f'{len(good_contigs)}', f'{len(good_contigs)/len(contig_len):.4f}', f'{bp_in_good_contigs}',
-                        f'{bp_in_good_contigs/total_bp:.4f}', f'{get_n50(good_contigs)}']))
+                        f'{len(good_contigs)} ({(len(good_contigs)/len(contig_len))*100:.2f}%)',
+                        f'{bp_in_good_contigs} ({(bp_in_good_contigs/total_bp)*100:.2f}%)', f'{get_n50(good_contigs)}']))
 
     # Create plot
     fig = go.Figure()
