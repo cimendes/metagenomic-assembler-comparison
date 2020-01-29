@@ -56,10 +56,10 @@ def main():
         seq = "".join(s.strip() for s in entry.__next__())
 
         contiguity, identity, lowest_window_identity, coverage, na50, aligned_seq, aligned_bp = \
-            get_alignment_stats(paf_filename, header_str, len(seq)) # devide by 3 for triple reference
+            get_alignment_stats(paf_filename, header_str, len(seq)/3)  # divide by 3 for triple reference
 
-        print(','.join([header_str, f'{len(seq)/3}', f'{contiguity:.4f}', f'{identity:.4f}',
-                        f'{lowest_window_identity:.4f}', f'{coverage:.4f}', f'{aligned_seq}', f'{aligned_bp}']))
+        print(','.join([header_str, f'{len(seq)/3}', f'{contiguity:.2f}', f'{identity:.2f}',
+                        f'{lowest_window_identity:.2f}', f'{coverage:.2f}', f'{aligned_seq}', f'{aligned_bp}']))
 
         contiguity_all.append(contiguity)
         identity_all.append(identity)
@@ -70,11 +70,12 @@ def main():
         aligned_bp_all.append(aligned_bp)
 
     print(','.join(
-        ["assembler", "mean breadth of coverage", " mean identity", "% aligned contigs",
+        ["assembler", "mean breadth of coverage", "mean contiguity", " mean identity", "% aligned contigs",
          "% aligned bp"]), file=sys.stderr)
 
-    result = [assembler, f'{mean(coverage_all):.4f}',
-              f'{mean(identity_all):.4f}', f'{sum(aligned_contigs_all)/contigs:.4f}', f'{sum(aligned_bp_all)/size:.4f}']
+    result = [assembler, f'{mean(coverage_all)*100:.2f}%', f'{mean(contiguity_all)*100:.2f}%',
+              f'{mean(identity_all):.2f}', f'{(sum(aligned_contigs_all)/contigs)*100:.2f}%',
+              f'{(sum(aligned_bp_all)/size)*100:.2f}%']
 
     print(','.join(result), file=sys.stderr)
 
@@ -124,10 +125,10 @@ def get_covered_bases(covered_bases_list, ref_len):
 
     for item in sorted_list:
         start, stop = map(int, item[:])
-        for base in range(start, stop + 1):
+        for base in range(start, stop):
             covered_bases.add(base)
 
-    # print("percent reference covered: ", len(covered_bases) / ref_len * 100)
+    print("percent reference covered: ", len(covered_bases) / ref_len * 100)
 
     return len(covered_bases) / ref_len
 
