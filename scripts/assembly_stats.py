@@ -125,8 +125,17 @@ def get_covered_bases(covered_bases_list, ref_len):
 
     for item in sorted_list:
         start, stop = map(int, item[:])
+        # due to the triple reference, the values need to be adjusted as not to over-estimate coverage breadth
+        # [0; ref_len][ref_len+1; 2*ref_len][(2*ref_len)+1; 3*ref_len]
         for base in range(start, stop):
-            covered_bases.add(base)
+            if base <= ref_len:
+                covered_bases.add(base)
+            elif base <= 2*ref_len:
+                #print(base, base-ref_len)
+                covered_bases.add(base-ref_len)
+            else:
+                #print(base-(ref_len*2))
+                covered_bases.add(base-(2*ref_len))
 
     print("percent reference covered: ", len(covered_bases) / ref_len * 100)
 
