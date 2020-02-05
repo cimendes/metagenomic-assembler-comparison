@@ -137,7 +137,7 @@ def get_covered_bases(covered_bases_list, ref_len):
                 #print(base-(ref_len*2))
                 covered_bases.add(base-(2*ref_len))
 
-    print("percent reference covered: ", len(covered_bases) / ref_len * 100)
+    #print("percent reference covered: ", len(covered_bases) / ref_len * 100)
 
     return len(covered_bases) / ref_len
 
