@@ -9,9 +9,9 @@ RUN apt-get update && apt-get -y install build-essential \
 WORKDIR /usr/local/src
 
 # Install updated cmake
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.0/cmake-3.18.0.tar.gz
-RUN tar xf cmake-3.18.0.tar.gz && rm cmake-3.18.0.tar.gz
-RUN cd cmake-3.18.0 && ./bootstrap && make && make install
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.0/cmake-3.18.0-Linux-x86_64.tar.gz
+RUN tar xf cmake-3.18.0-Linux-x86_64.tar.gz && rm cmake-3.18.0-Linux-x86_64.tar.gz
+ENV PATH="/usr/local/src/cmake-3.18.0-Linux-x86_64/bin:$PATH"
 
 WORKDIR /NGStools
 RUN wget https://github.com/GATB/minia/releases/download/v3.2.4/minia-v3.2.4-Source.tar.gz
