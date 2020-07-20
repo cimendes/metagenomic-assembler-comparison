@@ -11,7 +11,7 @@ RUN apt-get update && apt-get -y install \
 
 WORKDIR /NGStools
 
-RUN wget https://github.com/ncbi/SKESA/releases/download/v2.3.0/skesa.centos6.10
-RUN mv skesa.centos6.10 skesa && chmod +x skesa
+RUN wget https://github.com/ncbi/SKESA/releases/download/2.4.0/skesa.centos.7.7
+RUN mv skesa.centos.7.7 skesa && chmod +x skesa
 
 ENV PATH="/NGStools:$PATH"
