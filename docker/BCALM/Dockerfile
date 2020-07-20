@@ -9,9 +9,9 @@ WORKDIR /NGStools
 
 # Dependencies
 # BCALM
-RUN wget https://github.com/GATB/bcalm/releases/download/v2.2.1/bcalm-binaries-v2.2.1-Linux.tar.gz
-RUN tar xf bcalm-binaries-v2.2.1-Linux.tar.gz && rm bcalm-binaries-v2.2.1-Linux.tar.gz
+RUN wget hhttps://github.com/GATB/bcalm/releases/download/v2.2.3/bcalm-binaries-v2.2.3-Linux.tar.gz
+RUN tar xf bcalm-binaries-v2.2.3-Linux.tar.gz && rm bcalm-binaries-v2.2.3-Linux.tar.gz
 
-ENV PATH="/NGStools/bcalm-binaries-v2.2.1-Linux/bin:${PATH}"
+ENV PATH="/NGStools/bcalm-binaries-v2.2.3-Linux.tar.gz/bin:${PATH}"
 
 WORKDIR /data
