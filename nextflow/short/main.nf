@@ -65,8 +65,6 @@ process BCALM2 {
 
     # workdir cleanup
     rm list_reads
-    rm *.h5
-    rm *.glue.*
 
     mv ${sample_id}.unitigs.fa  ${sample_id}_BCALM2.fasta
     """
