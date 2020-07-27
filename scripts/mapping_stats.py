@@ -15,6 +15,7 @@ import glob
 import os
 import fnmatch
 
+# Relative path to this script.
 REFERENCE_SEQUENCES = '../data/references/Zymos_Genomes_triple_chromosomes.fasta'
 
 
@@ -45,9 +46,9 @@ def fasta_iter(fasta_name):
 
 def get_NA50 (alignment_lengths):
     """
-
-    :param alignment_lengths:
-    :return:
+    Callculate n50 form a list of contig lenghts
+    :param alignment_lengths: list of aligned contig length sizes (unordered)
+    :return: n50 of the aligned contigs (also called NA50
     """
     sorted_lengths = sorted(alignment_lengths, reverse=True)
     total_length = sum(sorted_lengths)
@@ -64,7 +65,7 @@ def get_NA50 (alignment_lengths):
 
 def get_covered_bases(covered_bases_list, ref_len):
     """
-
+    Get ration of referee lengths (ajusted for triple reference) covereded by contigs
     :param covered_bases_list:
     :param ref_len:
     :return:

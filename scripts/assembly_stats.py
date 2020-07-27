@@ -8,7 +8,19 @@ for the contigs with over 1000pb
 import sys
 import os
 import glob
+import fnmatch
 from itertools import groupby
+
+
+def get_mapped_contigs(paf_file):
+    """
+
+    :param paf_file:
+    :return: list of mapped contig lengths
+    """
+    with open(paf_file) as f:
+        mapped_contigs = [int(line.split()[1]) for line in f]
+    return mapped_contigs
 
 
 def fasta_iter(fasta_name):
@@ -79,21 +91,21 @@ def main():
     """
     try:
         assemblies = sorted(glob.glob(sys.argv[1] + '/*.fasta'))
+        mappings = glob.glob(sys.argv[2] + '/*')
     except IndexError as e:
         print(e, "Directory not found.")
         sys.exit(0)
 
     print(','.join(['Assembler', 'Contigs', 'basepairs', 'Max contig size', 'n50', 'contigs>1000bp (%)',
-                    ' bp in contigs>1000bp (%)','n50 in contigs>1000bp']))
+                    ' bp in contigs>1000bp (%)','n50 in contigs>1000bp', '% mapped contigs', '% mapped bp']))
 
     for assembly_file in assemblies:
 
         # get assembler name from filename. Expected format: `XX_<AssemblerName>.fasta`
         filename = os.path.basename(assembly_file).split('.')[0].rsplit('_')[-1]
 
-        fasta = fasta_iter(assembly_file)
-
-        contigs, contigs_over_1000bp = get_contig_lists(fasta)
+        mapped_contigs = get_mapped_contigs(fnmatch.filter(mappings, '*_'+filename+'.*')[0])
+        contigs, contigs_over_1000bp = get_contig_lists(fasta_iter(assembly_file))
 
         n50_contigs = get_N50(contigs)
         n50_contigs_over_1000bp = get_N50(contigs_over_1000bp)
@@ -101,7 +113,9 @@ def main():
         print(','.join([filename, f'{len(contigs)}', f'{sum(contigs)}', f'{n50_contigs}', f'{max(contigs)}',
                         f'{len(contigs_over_1000bp)} ({(len(contigs_over_1000bp)/len(contigs))*100:.2f}%)',
                         f'{sum(contigs_over_1000bp)} ({(sum(contigs_over_1000bp)/sum(contigs))*100:.2f}%)',
-                        f'{n50_contigs_over_1000bp}']))
+                        f'{n50_contigs_over_1000bp}',
+                        f'{len(mapped_contigs)} ({(len(mapped_contigs)/len(contigs))*100:.2f}%)',
+                        f'{sum(mapped_contigs)} ({(sum(mapped_contigs)/sum(contigs))*100:.2f}%)']))
 
 
 if __name__ == '__main__':
