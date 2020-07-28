@@ -6,13 +6,14 @@ TODO - Add description
 
 import sys
 from itertools import groupby
-import plotly.graph_objs as go
 from plotly.offline import plot
 import glob
 import os
 import fnmatch
 import pandas as pd
-import plotly.express as px
+import plotly.graph_objects as go
+
+
 
 COLOURS = ['#003f5c', '#2f4b7c', '#665191', '#a05195', '#d45087', '#f95d6a', '#ff7c43', '#ffa600']
 COLUMNS = ['Assembler','Contig', 'Contig Len', 'Mapped']
@@ -44,6 +45,11 @@ def fasta_iter(fasta_name):
 
 
 def get_n50(contig_lengths):
+    """
+
+    :param contig_lengths:
+    :return:
+    """
     contig_lengths = sorted(contig_lengths, reverse=True)
     total_length = sum(contig_lengths)
     target_length = total_length * 0.5
@@ -57,12 +63,24 @@ def get_n50(contig_lengths):
     return n50
 
 def get_mapped_contigs(paf_file):
-
+    """
+    Gets list with the sizes of the mapped contigs.
+    In the paf file, the first col is the contig name,
+    the second is the contig size (excludes gaps)
+    :param paf_file: path to the PAF file
+    :return: list with contig sizes
+    """
     with open(paf_file) as f:
         mapped_contigs = [line.split()[0] for line in f]
     return mapped_contigs
 
 
+def order_contigs(contig_list):
+    """
+
+    :param contig_list:
+    :return:
+    """
 
 def main():
     try:
@@ -75,10 +93,6 @@ def main():
 
     df = pd.DataFrame(columns=COLUMNS)
 
-    data_to_plot_assembled = []
-    legends = []
-    data_to_plot_mapped = []
-    data_to_plot_unmapped = []
 
     print(','.join(['Assembler', 'n Contigs', 'total bp', 'max contig size', 'n50', '% mapped contigs',
                     '% mapped bp']))
@@ -88,57 +102,45 @@ def main():
         filename = os.path.basename(file).split('.')[0].rsplit('_')[-1]
         mapped_contigs = get_mapped_contigs(fnmatch.filter(mappings, '*_'+filename+'.*')[0])
 
-        contig_len = []
-        total_bp = 0
-        bp_in_mapped_contigs = 0
-        mapped_contigs_to_plot = []
-        unmapped_contigs_to_plot = []
 
         fasta = fasta_iter(file)
         for header, seq in fasta:
-            contig_len.append(len(seq))
-            total_bp += len(seq)
             if header in mapped_contigs:
-                bp_in_mapped_contigs += len(seq)
-                mapped_contigs_to_plot.append(len(seq))
                 is_mapped = 'Mapped'
             else:
-                unmapped_contigs_to_plot.append(len(seq))
                 is_mapped = 'Unapped'
 
             df = df.append({'Assembler': filename, 'Contig': header, 'Contig Len': len(seq), 'Mapped': is_mapped},
-                       ignore_index=True)
-
-        data_to_plot_assembled.append(contig_len)
-        legends.append(filename)
-        data_to_plot_mapped.append(mapped_contigs_to_plot)
-        data_to_plot_unmapped.append(unmapped_contigs_to_plot)
-
-        print(','.join([filename, f'{len(contig_len)}', f'{total_bp}', f'{max(contig_len)}', f'{get_n50(contig_len)}',
-                        f'{len(mapped_contigs)} ({(len(mapped_contigs)/len(contig_len))*100:.2f}%)',
-                        f'{bp_in_mapped_contigs} ({(bp_in_mapped_contigs/total_bp)*100:.2f}%)']))
+                           ignore_index=True)
 
     df = df.reset_index()
 
-    for assembler in df['Assembler'].unique():
-        print(assembler)
-
     # Create plot
-    # fig = go.Figure()
-    #
-    # for data_all, title, data_mapped, data_unmapped, colour in zip(data_to_plot_assembled, legends, data_to_plot_mapped, data_to_plot_unmapped, COLOURS):
-    #     fig.add_trace(go.Box(y=data_all, name=title, boxpoints='outliers', boxmean=True, marker_color=colour))
-    #     fig.add_trace(go.Box(y=data_mapped, name=title+'_mapped', boxpoints='outliers', boxmean=True, marker_color=colour))
-    #     fig.add_trace(go.Box(y=data_unmapped, name=title+'_unmapped', boxpoints='outliers', boxmean=True, marker_color=colour))
-    # fig.update_layout(showlegend=False, yaxis_type="log", yaxis_title="Contig size (bp)",
-    #                   title="Contig size distribution per assembler (contigs over 1000 bp)")
-    # plot(fig)
+    fig = go.Figure()
 
-    fig = px.bar(df, x="Assembler", y="Contig Len", color="Mapped",
-                 title="Contig size per assembler (contigs over 1000 bp)", yaxis_type="log")
-    fig.show()
+    for assembler in sorted(df['Assembler'].unique()):
 
+        n_contigs = len(df['Contig Len'][df['Assembler'] == assembler])
+        total_bp = sum(df['Contig Len'][df['Assembler'] == assembler])
+        max_contig_size = max(df['Contig Len'][df['Assembler'] == assembler])
+        n50 = get_n50(df['Contig Len'][df['Assembler'] == assembler])
+        mapped_contigs = len([(df['Mapped'] == 'Mapped') & (df['Assembler'] == assembler)])
+        mapped_bp = sum([(df['Mapped'] == 'Mapped') & (df['Assembler'] == assembler)])
 
+        print(','.join([assembler, f'{n_contigs}', f'{total_bp}', f'{max_contig_size}', f'{n50}',
+                        f'{mapped_contigs} ({(mapped_contigs/n_contigs)*100:.2f}%)',
+                        f'{mapped_bp} ({(mapped_bp/total_bp)*100:.2f}%)']))
+
+        fig.add_trace(go.Box(x=df['Contig Len'][df['Assembler'] == assembler], name=assembler, boxpoints='outliers',
+                             boxmean=True, fillcolor='#D3D3D3', line=dict(color='#000000')))
+        fig.add_trace(go.Box(x=df['Contig Len'][(df['Mapped'] == 'Unapped') & (df['Assembler'] == assembler)],
+                             name=assembler, boxpoints='all', pointpos=0, marker=dict(color='rgba(178,37,34,0.7)'),
+                             line=dict(color='rgba(0,0,0,0)'), fillcolor='rgba(0,0,0,0)'))
+
+    fig.update_layout(showlegend=False, xaxis_type="log", xaxis_title="Contig size (Log bp)",
+                      title="Contig size distribution per assembler (contigs over 1000 bp)",
+                      plot_bgcolor='rgb(255,255,255)', xaxis=dict(zeroline=False, gridcolor='#DCDCDC'))
+    plot(fig)
 
 
 if __name__ == '__main__':
