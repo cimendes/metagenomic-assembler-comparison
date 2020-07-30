@@ -76,7 +76,7 @@ def parse_assemblies(assemblies, mappings):
             if header in mapped_contigs:
                 is_mapped = 'Mapped'
             else:
-                is_mapped = 'Unapped'
+                is_mapped = 'Unmapped'
 
             df = df.append({'Assembler': filename, 'Contig': header, 'Contig Len': len(seq), 'Mapped': is_mapped},
                            ignore_index=True)
@@ -84,6 +84,23 @@ def parse_assemblies(assemblies, mappings):
     df = df.reset_index()
 
     return df
+
+
+def save_unmapped_contigs(df, assembly_files):
+    """
+
+    :param df: dataframed
+    :param assembly_files: list of fasta files
+    :return:
+    """
+    for assembler in sorted(df['Assembler'].unique()):
+
+        fasta = fasta_iter(fnmatch.filter(assembly_files, '*_' + assembler + '.*')[0])
+        unmapped_contigs = list(df['Contig'][(df['Mapped'] == 'Unmapped') & (df['Assembler'] == assembler)])
+        with open('unmapped_'+assembler+'.fasta', 'w') as fh:
+            for header, seq in fasta:
+                if header in unmapped_contigs:
+                    fh.write(">" + header + "\n" + seq + "\n")
 
 
 def main():
@@ -100,6 +117,8 @@ def main():
 
     df = parse_assemblies(assemblies, mappings)
 
+    save_unmapped_contigs(df, assemblies)
+
     # Create plot
     fig = go.Figure()
 
@@ -113,7 +132,7 @@ def main():
 
         fig.add_trace(go.Box(x=df['Contig Len'][df['Assembler'] == assembler], name=assembler, boxpoints='outliers',
                              boxmean=True, fillcolor='#D3D3D3', line=dict(color='#000000')))
-        fig.add_trace(go.Box(x=df['Contig Len'][(df['Mapped'] == 'Unapped') & (df['Assembler'] == assembler)],
+        fig.add_trace(go.Box(x=df['Contig Len'][(df['Mapped'] == 'Unmapped') & (df['Assembler'] == assembler)],
                              name=assembler, boxpoints='all', pointpos=0, marker=dict(color='rgba(178,37,34,0.7)'),
                              line=dict(color='rgba(0,0,0,0)'), fillcolor='rgba(0,0,0,0)'))
 
