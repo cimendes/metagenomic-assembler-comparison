@@ -131,7 +131,7 @@ def main():
                         f'{sum(mapped_contigs)} ({(sum(mapped_contigs)/sum(contigs))*100:.2f}%)']))
 
         fig.add_trace(go.Box(x=df['Contig Len'][df['Assembler'] == assembler], name=assembler, boxpoints='outliers',
-                             boxmean=True, fillcolor='#D3D3D3', line=dict(color='#000000')))
+                             boxmean=False, fillcolor='#D3D3D3', line=dict(color='#000000')))
         fig.add_trace(go.Box(x=df['Contig Len'][(df['Mapped'] == 'Unmapped') & (df['Assembler'] == assembler)],
                              name=assembler, boxpoints='all', pointpos=0, marker=dict(color='rgba(178,37,34,0.7)'),
                              line=dict(color='rgba(0,0,0,0)'), fillcolor='rgba(0,0,0,0)'))
