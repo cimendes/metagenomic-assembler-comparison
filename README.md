@@ -1,4 +1,4 @@
-#  Benchmarking of de novo metagenomic assembly software
+#  Benchmarking of de novo (meta)genomic assembly software
 
  :warning: WORK IN PROGRESS :warning:
 

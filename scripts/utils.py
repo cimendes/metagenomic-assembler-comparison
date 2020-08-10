@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+import os
+import fnmatch
+from itertools import groupby
+import pandas as pd
+
+COLUMNS = ['Assembler', 'Contig', 'Contig Len', 'Mapped']  # columns for dataframe
+
+
+def get_assember_name(assembly_file):
+    """
+    get assembler name from filename. Expected format: `XX_<AssemblerName>.fasta`
+    :param assembly_file: path
+    :return: filename
+    """
+    return os.path.basename(assembly_file).split('.')[0].rsplit('_')[-1]
+
+
+def fasta_iter(fasta_name):
+    """
+    Given a fasta file. yield tuples of header, sequence.
+    Modified from Brent Pedersen's Correct Way To Parse A Fasta File In Python.
+    :param fasta_name: string with fasta file to parse
+    :return: tuples with header, sequence (yield)
+    """
+    fh = open(fasta_name)
+
+    # ditch the boolean (x[0]) and just keep the header or sequence since
+    # we know they alternate.
+    faiter = (x[1] for x in groupby(fh, lambda line: line[0] == ">"))
+
+    for header in faiter:
+        # drop the ">"
+        headerStr = header.__next__()[1:].strip().split()[0]
+
+        # join all sequence lines to one.
+        try:
+            seq = "".join(s.strip() for s in faiter.__next__())
+        except StopIteration:
+            print(headerStr)
+
+        yield (headerStr, seq)
+
+
+def get_mapped_contigs(paf_file):
+    """
+    Gets list with the sizes of the mapped contigs.
+    In the paf file, the first col is the contig name,
+    the second is the contig size (excludes gaps)
+    :param paf_file: path to the PAF file
+    :return: list with contig sizes
+    """
+    with open(paf_file) as f:
+        mapped_contigs = [line.split()[0] for line in f]
+    return mapped_contigs
+
+
+def get_mapped_contigs_with_ref(paf_file):
+    """
+    Gets list with the sizes of the mapped contigs.
+    In the paf file, the first col is the contig name,
+    the second is the contig size (excludes gaps)
+    :param paf_file: path to the PAF file
+    :return: dict with contig names and matching reference
+    """
+    mapped_contigs = {}
+    with open(paf_file) as f:
+        for line in f:
+            mapped_contigs[line.split()[0]] = line.split()[5]
+    return mapped_contigs
+
+
+def parse_assemblies(assemblies, mappings):
+    """
+    Parses fastas and paf files and returns info on 'Assembler','Contig', 'Contig Len', 'Mapped' as dataframe
+    :param assemblies: list of assembly files
+    :param mappings: list of paf files
+    :return: pandas dataframe
+    """
+    df = pd.DataFrame(columns=COLUMNS)
+
+    for fasta_file in assemblies:
+
+        filename = get_assember_name(fasta_file)
+        mapped_contigs = get_mapped_contigs(fnmatch.filter(mappings, '*_' + filename + '.*')[0])
+
+        fasta = fasta_iter(fasta_file)
+        for header, seq in fasta:
+            if header in mapped_contigs:
+                is_mapped = 'Mapped'
+            else:
+                is_mapped = 'Unmapped'
+
+            df = df.append({'Assembler': filename, 'Contig': header, 'Contig Len': len(seq), 'Mapped': is_mapped},
+                           ignore_index=True)
+
+    df = df.reset_index()
+
+    return df
+
+
+def get_N50(alignment_lengths):
+    """
+    Callculate n50 form a list of contig lenghts
+    :param alignment_lengths: list of aligned contig length sizes (unordered)
+    :return: n50 of the aligned contigs (also called NA50
+    """
+    sorted_lengths = sorted(alignment_lengths, reverse=True)  # from longest to shortest
+    total_length = sum(sorted_lengths)
+    target_length = total_length * 0.5
+    length_so_far = 0
+    n50 = 0
+    for contig_length in sorted_lengths:
+        length_so_far += contig_length
+        if length_so_far >= target_length:
+            n50 = contig_length
+            break
+    return n50
+
