@@ -1,11 +1,30 @@
 #!/usr/bin/env python3
-"""
-Script to obtain information of percentage of mapping contigs/basepairs
-and produce a descriptive boxplot.
+# -*- coding: utf-8 -*-
 
-Requires as input:
-    - path for assembly data (filtered for over 1000bp ( files ending in *.fasta);
-    - path for paf files (files ending in *.paf)
+"""
+Purpose
+-------
+Script to obtain information of percentage of mapping contigs/basepairs from the filtered assemblies
+and produce a descriptive boxplot for mapped and unmapped contigs per assembler.
+
+For each assembly, this script will output to the command line for each reference genome:
+  * Assembler - assembler name (from fasta file name)
+  * % mapped contigs - number of contigs that map to the reference files (and % over contigs > 1000bp)
+  * % mapped bp - number of basepairs that map to the reference files (and % over total basepairs in
+contigs > 1000bp)
+
+Additionally, a Boxplot with boxes with size distribution of mapped contigs and scatter plot of the lenght o
+
+Expected input
+--------------
+This script takes the following arguments (in this order):
+  * Path to the unfiltered (raw) assembly files (ending in *.fasta)
+  * Path to the mapped contings to the triple reference genomes (ending in *.paf)
+
+Authorship
+----------
+Inês Mendes, cimendes@medicina.ulisboa.pt
+https://github.com/cimendes
 """
 
 import sys

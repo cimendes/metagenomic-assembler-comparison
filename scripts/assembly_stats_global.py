@@ -1,8 +1,34 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 """
 Get the basic statistics for a directory of RAW assemblies.
-Outputs the statistics for all the contigs in the assembly and
-for the contigs with over 1000pb
+Outputs the statistics for all the contigs in the assembly and for the contigs with over 1000pb
+
+Purpose
+-------
+Get the basic statistics for a directory of RAW assembly files (*.fasta), unfiltered for length.
+
+For each assembly, this script will output to the command line for each reference genome:
+  * Assembler - assembler name (from fasta file name)
+  * Contigs - number of contigs in the assembly
+  * basepairs - total number of nucleotides in the assembly
+  * Max contig size - size of the largest contig in the assembly
+  * n50 - sequence length of the shortest contig at 50% of the total assembly length
+  * contigs>1000bp (%) - number of contigs with size >= 1000 bp (and % over "Contigs")
+  * bp in contigs>1000bp (%) - total number of nucleotides in contigs with size >= 1000 bp (and % over "basepairs")
+  * n50 in contigs>1000bp - sequence length of the shortest contig at 50% of the total length of contigs with ´
+size >= 1000 bp
+
+Expected input
+--------------
+This script takes the following arguments (in this order):
+  * Path to the unfiltered (raw) assembly files (ending in *.fasta)
+
+Authorship
+----------
+Inês Mendes, cimendes@medicina.ulisboa.pt
+https://github.com/cimendes
 """
 
 import sys
@@ -14,11 +40,12 @@ import utils
 
 def get_contig_lists(fasta):
     """
-    Get basic assembly statistics from a fasta
+    From a fasta iterator, get lists with contig lengths
     :param fasta: yield tuples of header, sequence
     :return:
+        - contig_len: list with all contig lenghts in the assembly
+        - contigs_len_over_1000: list with contig lenghts filtered for a minimum of 1000 nucleotides
     """
-
     contigs_len_over_1000 = []  # list of contigs with len > 1000
     contigs_len = []  # list with all contig lens
 
@@ -32,9 +59,9 @@ def get_contig_lists(fasta):
 
 def main():
     """
-    in a directory with assemblies (ended in .fasta),
-    calculate the assembly statistics (number of contigs, total number of basepairs, max contig size, n50
-    for all contigs per assembly, including seperate stats for the contigs with over 1000bp
+    in a directory with assemblies (ended in "*.fasta"),
+    calculate the assembly statistics (number of contigs, total number of basepairs, max contig size, n50)
+    for all contigs per assembly, including separate stats for the contigs with over 1000bp
     """
     try:
         assemblies = sorted(glob.glob(sys.argv[1] + '/*.fasta'))
