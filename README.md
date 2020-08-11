@@ -11,6 +11,7 @@
     * [Assessing Assembly Success](#assessing-assembly-success)
 * [Results](#resuls)
 * [Authors](#authors)
+* [References](#references)
 
 
 ## Introduction
@@ -240,7 +241,7 @@ alignment between the assembly and the reference. More information is available 
 The results for each dataset are availale in the [results](results) folder.
 
 ## Authors
-* Inês Mendes 
+* Inês Mendes <cimendes@medicina.ulisboa.pt> 
     * Instituto de Microbiologia, Instituto de Medicina Molecular, Faculdade de Medicina, Universidade de Lisboa, 
     Lisboa, Portugal; 
     * University of Groningen, University Medical Center Groningen, Department of Medical Microbiology and Infection 
@@ -251,3 +252,16 @@ The results for each dataset are availale in the [results](results) folder.
 * Yair Motro 
     * Department of Health System Management, School of Public Health, Faculty of Health Sciences, Ben-Gurion 
 University of the Negev, Beer-Sheva, Israel.
+
+## References
+* Angers-Loustau, A., Petrillo, M., Bengtsson-Palme, J., Berendonk, T., Blais, B., Chan, K.-G., et al. (2018). The challenges of designing a benchmark strategy for bioinformatics pipelines in the identification of antimicrobial resistance determinants using next generation sequencing technologies. F1000Research 7, 459. doi:10.12688/f1000research.14509.1.
+* N Couto, L Schuele, EC Raangs, MP Machado, ​CI Mendes​, TF Jesus, M Chlebowicz, S Rosema, M Ramirez, JA Carriço, IB Autenrieth, AW Friedrich, S Peter, JW Rossen. (2018) Critical steps in clinical shotgun metagenomics for the concomitant detection and typing of microbial pathogens. Scientific Reports 8: 13767. Doi: 10.1038/s41598-018-31873-w
+* Gruening, B., Sallou, O., Moreno, P., Leprevost, F. D. V., Ménager, H., Søndergaard, D., et al. (2018). Recommendations for the packaging and containerizing of bioinformatics software. F1000Research 7, 742. doi:10.12688/f1000research.15140.1.
+* Kurtzer, G. M., Sochat, V., and Bauer, M. W. (2017). Singularity: Scientific containers for mobility of compute. Plos One 12. doi:10.1371/journal.pone.0177459
+* Li, D., Liu, C.-M., Luo, R., Sadakane, K., and Lam, T.-W. (2015). MEGAHIT: an ultra-fast single-node solution for large and complex metagenomics assembly via succinct de Bruijn graph. Bioinformatics 31, 1674–1676. doi:10.1093/bioinformatics/btv033.
+* Samuel M Nicholls, Joshua C Quick, Shuiquan Tang, Nicholas J Loman, Ultra-deep, long-read nanopore sequencing of mock microbial community standards, GigaScience, Volume 8, Issue 5, May 2019, giz043, https://doi.org/10.1093/gigascience/giz043 
+* Nurk, S., Meleshko, D., Korobeynikov, A., and Pevzner, P. A. (2017). metaSPAdes: a new versatile metagenomic assembler. Genome Research 27, 824–834. doi:10.1101/gr.213959.116.
+* Olson, N. D., Treangen, T. J., Hill, C. M., Cepeda-Espinoza, V., Ghurye, J., Koren, S., et al. (2017). Metagenomic assembly through the lens of validation: recent advances in assessing and improving the quality of genomes assembled from metagenomes. Briefings in Bioinformatics. doi:10.1093/bib/bbx098.
+* Sczyrba, A., Hofmann, P., Belmann, P., Koslicki, D., Janssen, S., Dröge, J., et al. (2017). Critical Assessment of Metagenome Interpretation—a benchmark of metagenomics software. Nature Methods 14, 1063–1071. doi:10.1038/nmeth.4458
+* Teeling, H., and Glockner, F. O. (2012). Current opportunities and challenges in microbial metagenome analysis--a bioinformatic perspective. Briefings in Bioinformatics 13, 728–742. doi:10.1093/bib/bbs039.
+* Tommaso, P. D., Chatzou, M., Floden, E. W., Barja, P. P., Palumbo, E., and Notredame, C. (2017). Nextflow enables reproducible computational workflows. Nature Biotechnology 35, 316–319. doi:10.1038/nbt.3820
