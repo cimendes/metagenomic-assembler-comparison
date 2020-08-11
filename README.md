@@ -8,14 +8,8 @@
 * [Methods](#methods)
     * [de novo Assembly tools](#de-novo-assembly-tools)
     * [Benchmark datasets](#benchmark-datasets)
-    * [Assessing Metagenomic Assembly Success](#assessing-metagenomic-assembly-success)
-        * [Assembly Continuity](#assembly-continuity)
-        * [Chimera Assessment](#chimera-assessment)
+    * [Assessing Assembly Success](#assessing-assembly-success)
 * [Results](#resuls)
-    * [Zymobiomics Community Standard](#zymobiomics-community-standard)
-        * [Mock Community](#mock-community)
-        * [Even distributed](#even-distributed)
-        * [Log distributed](#log-distributed)
 * [Authors](#authors)
 
 
@@ -205,7 +199,7 @@ Kraken2 with the minimkaken2_V1 database):
 </p>
 
 
-### Assessing Metagenomic Assembly Success
+### Assessing Assembly Success
 
 The assembly performance is evaluated through mapping of the obtained assemblies to the [triple bacterial reference sequences](data/references/Zymos_Genomes_triple_chromosomes.fasta), 
 with [minimap2](https://github.com/lh3/minimap2), using the [docker image](docker/minimap2/Dockerfile) 
