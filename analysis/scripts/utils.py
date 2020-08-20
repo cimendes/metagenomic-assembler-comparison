@@ -117,3 +117,15 @@ def get_N50(alignment_lengths):
             break
     return n50
 
+
+def is_number(n):
+    """
+    Verify if n is a number by trying to set it to float
+    :param n: value to be verified
+    :return: Bool is value is a number or not
+    """
+    try:
+        float(n)
+        return True
+    except ValueError:
+        return False
