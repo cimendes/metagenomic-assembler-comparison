@@ -193,11 +193,7 @@ MiSeq using 2×151 bp (paired-end) sequencing. They are available under accessio
 * [ERR2935805](https://www.ebi.ac.uk/ena/data/view/ERR2935805) (log)
 
 With the [M3S3 tool](http://medweb.bgu.ac.il/m3s3/), a simulation sample was obtained made up of the Zymobiomics 
-microbial community standasrd species of **bacteria** (n=8). The sample has the following composition (obtained with 
-Kraken2 with the minimkaken2_V1 database):
-<p align="center">
-  <img width="360" src="figures/ZymoBIOMICS_std_report.kraken2.bracken2.pie.png" alt="zymos_zimulated_kraken2"/>
-</p>
+microbial community standasrd species of **bacteria** (n=8).
 
 
 ### Assessing Assembly Success
@@ -238,7 +234,7 @@ alignment between the assembly and the reference. More information is available 
 
 ## Results
 :warning:TODO:warning:
-The results for each dataset are availale in the [results](results) folder.
+The results for each dataset are available in the [results](results) folder.
 
 ## Authors
 * Inês Mendes <cimendes@medicina.ulisboa.pt> 
