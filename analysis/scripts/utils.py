@@ -39,7 +39,7 @@ def fasta_iter(fasta_name):
         except StopIteration:
             print(headerStr)
 
-        yield (headerStr, seq)
+        yield headerStr, seq
 
 
 def get_mapped_contigs(paf_file):

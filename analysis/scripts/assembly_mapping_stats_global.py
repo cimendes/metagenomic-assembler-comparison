@@ -19,7 +19,7 @@ Expected input
 --------------
 This script takes the following arguments (in this order):
   * Path to the unfiltered (raw) assembly files (ending in *.fasta)
-  * Path to the mapped contings to the triple reference genomes (ending in *.paf)
+  * Path to the mapped contigs to the triple reference genomes (ending in *.paf)
 
 Authorship
 ----------
@@ -36,11 +36,12 @@ import plotly.graph_objects as go
 #import commonly used functions from utils.py
 import utils
 
+
 def save_unmapped_contigs(df, assembly_files):
     """
-
-    :param df: dataframed
-    :param assembly_files: list of fasta files
+    For each assembly, saves all unmapped contigs in separate fasta files
+    :param df: dataframe with assembly info
+    :param assembly_files: list of assembly fasta files
     :return:
     """
     for assembler in sorted(df['Assembler'].unique()):
@@ -57,16 +58,14 @@ def main():
     try:
         assemblies = glob.glob(sys.argv[1] + '/*.fasta')
         mappings = glob.glob(sys.argv[2] + '/*.paf')
-
     except IndexError as e:
         print(e, "files not found")
         sys.exit(0)
+
     #add sanity check
     if len(assemblies) != len(mappings):
         print("Number of input files don't match.")
         sys.exit(0)
-
-
 
     print(','.join(['Assembler', '% mapped contigs', '% mapped bp']))
 
@@ -75,7 +74,7 @@ def main():
 
     save_unmapped_contigs(df, assemblies)
 
-    # Create plot
+    # Create plot - contig distribution (mapped vs unmapped contigs for each assembler)
     fig = go.Figure()
 
     for assembler in sorted(df['Assembler'].unique()):
@@ -86,9 +85,11 @@ def main():
         print(','.join([assembler, f'{len(mapped_contigs)} ({(len(mapped_contigs)/len(contigs))*100:.2f}%)',
                         f'{sum(mapped_contigs)} ({(sum(mapped_contigs)/sum(contigs))*100:.2f}%)']))
 
+        # mapped contigs as boxplots
         fig.add_trace(go.Box(x=df['Contig Len'][(df['Mapped'] == 'Mapped') & (df['Assembler'] == assembler)],
                             name=assembler, boxpoints='outliers',
                              boxmean=False, fillcolor='#D3D3D3', line=dict(color='#000000')))
+        # unmapped contigs as scatter-like plot (boxplot showing only the underlying data)
         fig.add_trace(go.Box(x=df['Contig Len'][(df['Mapped'] == 'Unmapped') & (df['Assembler'] == assembler)],
                              name=assembler, boxpoints='all', pointpos=0, marker=dict(color='rgba(178,37,34,0.7)'),
                              line=dict(color='rgba(0,0,0,0)'), fillcolor='rgba(0,0,0,0)'))

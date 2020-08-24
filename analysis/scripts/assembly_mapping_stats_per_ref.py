@@ -20,11 +20,10 @@ Expected input
 --------------
 This script takes the following arguments (in this order):
   * Path to the metagenomic assembly files (ending in *.fasta)
-  * Path to the mapped contings to the triple reference genomes (ending in *.paf)
+  * Path to the mapped contigs to the triple reference genomes (ending in *.paf)
 
 The triple bacterial reference files for the zymos mock community are available at
-"../data/references/Zymos_Genomes_triple_chromosomes.fasta"
-
+"../../data/references/Zymos_Genomes_triple_chromosomes.fasta"
 
 Authorship
 ----------
@@ -46,7 +45,8 @@ import fnmatch
 import utils
 
 REFERENCE_SEQUENCES = os.path.join(os.path.dirname(__file__),
-                                   '..', 'data', 'references', 'Zymos_Genomes_triple_chromosomes.fasta')
+                                   '..', '..', 'data', 'references', 'Zymos_Genomes_triple_chromosomes.fasta')
+
 
 def get_c90(alignment_lengths, ref_len):
     """
@@ -242,12 +242,12 @@ def add_matching_ref(df, mappings):
         mapped_contigs = utils.get_mapped_contigs_with_ref(paf_file)  # dictionary with contigs
         
         for contig in df['Contig'][(df['Mapped'] == 'Mapped') & (df['Assembler'] == assembler)]:
-            #get index.
+            # get index.
             row_index = df[(df['Contig'] == contig) & (df['Mapped'] == 'Mapped') & (df['Assembler'] == assembler)]\
                 .index.item()
-            df.loc[row_index,'Mapped'] = mapped_contigs[contig] # update with reference
+            df.loc[row_index, 'Mapped'] = mapped_contigs[contig]  # update with reference
 
-    #remove unmapped contigs from dataframe
+    # remove unmapped contigs from dataframe
     df = df.drop(df[df.Mapped == 'Unmapped'].index)
     return df
 
