@@ -75,7 +75,7 @@ def get_gaps(paf_file, ref_name, ref_len):
 
     covered_bases = list(covered_bases)
     gaps = [[s, e]for s, e in zip(covered_bases, covered_bases[1:]) if s+1 < e]  # get list of gap sizes coords
-    gap_sizes = [coord[1]-coord[0] for coord in gaps]
+    gap_sizes = [coord[1]-coord[0]-1 for coord in gaps]
     return gap_sizes
 
 

@@ -188,7 +188,7 @@ def get_alignment_stats(paf_filename, ref_name, ref_length):
     return contiguity, coverage, lowest_identity, identity
 
 
-def parse_paf_files(df, mappings):
+def parse_paf_files(df, mappings, print_csv = False):
     """
     Parses fasta, paf files references and returns info in dataframe.
     :param df: pandas DataFrame with assembly stats
@@ -211,6 +211,10 @@ def parse_paf_files(df, mappings):
         print(','.join(["Reference", "Reference Length", "Contiguity", "Identity", "Lowest Identity",
                         "Breadth of Coverage", "C90", "Aligned Contigs", "NA50", "Aligned Bp"]))
 
+        if print_csv:
+            fh = open(assembler + "_breadth_of_coverage_contigs.csv", "w")
+            fh.write("Reference, Breadth of Coverage, Contigs\n")
+
         for header in references:
             header_str = header.__next__()[1:].strip().split()[0]
             seq = "".join(s.strip() for s in references.__next__())
@@ -224,9 +228,15 @@ def parse_paf_files(df, mappings):
 
             contiguity, coverage, lowest_identity, identity = get_alignment_stats(paf_file, header_str, len(seq)/3)
 
+            if print_csv:
+                fh.write(','.join([header_str, str(coverage), str(len(mapped_contigs))]) + '\n')
+
             print(','.join([header_str, f'{len(seq)/3}', f'{contiguity:.2f}', f'{identity:.2f}',
                             f'{lowest_identity:.2f}', f'{coverage:.2f}', f'{c90}',
-                            f'{len(mapped_contigs)}',f'{na50}', f'{sum(mapped_contigs)}']))
+                            f'{len(mapped_contigs)}', f'{na50}', f'{sum(mapped_contigs)}']))
+
+        if print_csv:
+            fh.close()
 
 
 def add_matching_ref(df, mappings):
@@ -261,6 +271,12 @@ def main():
         print(e, "files not found")
         sys.exit(0)
 
+    try:
+        if sys.argv[3] == "--print-csv":
+            print_csv = True
+    except IndexError as e:
+        print_csv = False
+
     # Dataframe with assembly info
     df = utils.parse_assemblies(assemblies, mappings)
 
@@ -268,7 +284,7 @@ def main():
     df = add_matching_ref(df, mappings)
 
     # Get and print mapping stats tables for each assembler
-    parse_paf_files(df, mappings)
+    parse_paf_files(df, mappings, print_csv)
 
 
 if __name__ == '__main__':

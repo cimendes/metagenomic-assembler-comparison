@@ -31,7 +31,7 @@ The contigs obtained in an assembly, ideally each collecting the sequences that 
 microorganism present in the sample, represents one of the greatest bottlenecks when trying to obtain fiable, 
 reproducible results, not only in metagenomic samples but also in classical whole genome sequencing methodologies. 
 
-Several **dedicated** metagenomic assembly tools for short-read data are available that, n comparison to traditional 
+Several **dedicated** metagenomic assembly tools for short-read data are available that, in comparison to traditional 
 assemblers, are supposed to be better at dealing with the combination of intragenomic and intergenomic repeats and 
 uneven sequencing coverage (Olson et al., 2017). The use of non dedicated assemblers for metagenomics may come with the 
 cost of wrongly interpret variation as error, especially in samples that contained closely related species, and the 
@@ -41,7 +41,7 @@ and a reproducible comparison of methods has yet to be performed.
 
 The *de novo* assembly is one of the key processesses when analysing (meta)genomic data as, in theory, it allows the 
 re-build of complete genomes from a pool of raw sequence. To assess the performance and limitations of currently 
-available de novo assembly algorithms, we propose a benchmarking of **currently available and recently mantained** 
+available de novo assembly algorithms, we propose a benchmarking of **currently available and recently maintained** 
 *de novo* assembly tools, both traditional and dedicated for metagenomic data. 
 
 
@@ -56,8 +56,8 @@ the Nextflow (Tommaso et al., 2017) workflow managers pushes reproducibility to 
 containerization and scalability, enabling the workflow to be executed with the exact same parameters in the same 
 conditions in a multitude of different environments.
 
-The [scripts](scripts/) of the analysis of the assembly results are provided in this repository, alongside a [Jupyter Notebook]() 
-describing the steps in which the scripts were used. 
+The scripts of the analysis of the assembly results are provided in this repository, alongside a Jupyter Notebook 
+describing the steps in which the scripts were used, available in the [analysis](analysis/) folder. 
 
 
 ### *de novo* Assembly tools
