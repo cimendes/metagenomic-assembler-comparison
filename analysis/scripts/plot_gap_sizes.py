@@ -129,7 +129,7 @@ def main():
                              name=assembler, boxpoints='outliers',
                              boxmean=False, fillcolor='#D3D3D3', line=dict(color='#000000')))
 
-    fig.update_layout(showlegend=False, xaxis_type="log", xaxis_title="Contig size (Log bp)",
+    fig.update_layout(showlegend=False, xaxis_type="log", xaxis_title="Gap size (Log bp)",
                       title="Gap size distribution per assembler (contigs over 1000 bp)",
                       plot_bgcolor='rgb(255,255,255)', xaxis=dict(zeroline=False, gridcolor='#DCDCDC'))
     plot(fig)

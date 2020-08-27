@@ -6,6 +6,18 @@ import pandas as pd
 
 COLUMNS = ['Assembler', 'Contig', 'Contig Len', 'Mapped']  # columns for dataframe
 
+# Dic for pretty print of reference names
+REFERENCE_DIC = {
+    "BS.pilon.polished.v3.ST170922": "Bacillus subtilis",
+    "Enterococcus_faecalis_complete_genome": "Enterococcus faecalis",
+    "Escherichia_coli_chromosome": "Escherichia coli",
+    "Lactobacillus_fermentum_complete_genome": "Lactobacillus fermentum",
+    "Listeria_monocytogenes_complete_genome": "Listeria monocytogenes",
+    "Pseudomonas_aeruginosa_complete_genome": "Pseudomonas aeruginosa",
+    "Salmonella_enterica_complete_genome": "Salmonella enterica",
+    "Staphylococcus_aureus_triple_chromosome": "Staphylococcus aureus"
+}
+
 
 def get_assember_name(assembly_file):
     """

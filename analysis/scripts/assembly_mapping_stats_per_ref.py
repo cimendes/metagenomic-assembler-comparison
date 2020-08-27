@@ -40,13 +40,14 @@ import glob
 import os
 import re
 import fnmatch
+import pandas as pd
+import plotly.express as px
 
 #import commonly used functions from utils.py
 import utils
 
 REFERENCE_SEQUENCES = os.path.join(os.path.dirname(__file__),
                                    '..', '..', 'data', 'references', 'Zymos_Genomes_triple_chromosomes.fasta')
-
 
 def get_c90(alignment_lengths, ref_len):
     """
@@ -188,13 +189,17 @@ def get_alignment_stats(paf_filename, ref_name, ref_length):
     return contiguity, coverage, lowest_identity, identity
 
 
+
 def parse_paf_files(df, mappings, print_csv = False):
     """
     Parses fasta, paf files references and returns info in dataframe.
     :param df: pandas DataFrame with assembly stats
     :param mappings: list of paf files
-    :return: pandas Dataframe with columns in COLUMNS
+    :return: pandas Dataframe with columns Reference, Assembler and C90
     """
+
+    # Dataframe for plot
+    df_c90 = pd.DataFrame(columns=['Reference', 'Assembler', 'C90'])
 
     for assembler in sorted(df['Assembler'].unique()):
 
@@ -217,6 +222,7 @@ def parse_paf_files(df, mappings, print_csv = False):
 
         for header in references:
             header_str = header.__next__()[1:].strip().split()[0]
+            reference_name = utils.REFERENCE_DIC[header_str]
             seq = "".join(s.strip() for s in references.__next__())
 
             df_assembler_reference = df_assembler[df_assembler['Mapped'] == header_str]
@@ -226,17 +232,21 @@ def parse_paf_files(df, mappings, print_csv = False):
             na50 = utils.get_N50(mapped_contigs)
             c90 = get_c90(mapped_contigs, len(seq)/3)  # adjust for triple reference
 
+            df_c90 = df_c90.append({'Reference': reference_name, 'Assembler': assembler, 'C90': c90}, ignore_index=True)
+
             contiguity, coverage, lowest_identity, identity = get_alignment_stats(paf_file, header_str, len(seq)/3)
 
             if print_csv:
-                fh.write(','.join([header_str, str(coverage), str(len(mapped_contigs))]) + '\n')
+                fh.write(','.join([reference_name, str(coverage), str(len(mapped_contigs))]) + '\n')
 
-            print(','.join([header_str, f'{len(seq)/3}', f'{contiguity:.2f}', f'{identity:.2f}',
+            print(','.join([reference_name, f'{len(seq)/3}', f'{contiguity:.2f}', f'{identity:.2f}',
                             f'{lowest_identity:.2f}', f'{coverage:.2f}', f'{c90}',
                             f'{len(mapped_contigs)}', f'{na50}', f'{sum(mapped_contigs)}']))
 
         if print_csv:
             fh.close()
+
+    return df_c90
 
 
 def add_matching_ref(df, mappings):
@@ -284,7 +294,11 @@ def main():
     df = add_matching_ref(df, mappings)
 
     # Get and print mapping stats tables for each assembler
-    parse_paf_files(df, mappings, print_csv)
+    to_plot = parse_paf_files(df, mappings, print_csv)
+
+    # Create plot - C90 per reference
+    fig = px.scatter(to_plot, x="C90", y="Reference", color="Assembler", title="C90")
+    fig.show()
 
 
 if __name__ == '__main__':
