@@ -41,13 +41,19 @@ import os
 import re
 import fnmatch
 import pandas as pd
-import plotly.express as px
+from plotly.offline import plot
+import plotly.graph_objects as go
 
 #import commonly used functions from utils.py
 import utils
 
 REFERENCE_SEQUENCES = os.path.join(os.path.dirname(__file__),
                                    '..', '..', 'data', 'references', 'Zymos_Genomes_triple_chromosomes.fasta')
+
+# colors for each subplot
+colours = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c',
+          '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928']
+
 
 def get_c90(alignment_lengths, ref_len):
     """
@@ -297,8 +303,21 @@ def main():
     to_plot = parse_paf_files(df, mappings, print_csv)
 
     # Create plot - C90 per reference
-    fig = px.scatter(to_plot, x="C90", y="Reference", color="Assembler", title="C90")
-    fig.show()
+    fig = go.Figure()
+    i = 0
+    for assembler in sorted(to_plot['Assembler'].unique()):
+        fig.add_trace(go.Scatter(x=to_plot['C90'][to_plot['Assembler'] == assembler],
+                                 y=to_plot['Reference'][to_plot['Assembler'] == assembler],
+                                 mode='markers', name=assembler,
+                                 marker=dict(color=colours[i], size=12, line=dict(width=1, color='black'))))
+        i += 1
+    fig.update_layout(title="C90 per reference genome for each assembler",
+                      xaxis_title="Contigs",
+                      plot_bgcolor='rgb(255,255,255)',
+                      xaxis=dict(showline=True, zeroline=False, linewidth=1, linecolor='black', gridcolor='#DCDCDC')
+                      )
+
+    plot(fig)
 
 
 if __name__ == '__main__':
