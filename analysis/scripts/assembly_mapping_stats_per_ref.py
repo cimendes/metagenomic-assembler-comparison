@@ -168,17 +168,17 @@ def get_alignment_stats(paf_filename, ref_name, ref_length):
             if parts[5] == ref_name:
                 start, end = int(parts[7]), int(parts[8])
                 alignment_lengths.append(end - start)
-                matching_bases, total_bases = int(parts[9]), int(parts[10])
+                matching_bases, total_bases = int(parts[9]), int(parts[10])  # original col 9 / col 10
                 total_bases_list.append(total_bases)
                 cigar = [x for x in parts if x.startswith('cg:Z:')][0][5:]
 
                 #normalized id
-                n_identity.append((matching_bases / total_bases) * total_bases)
+                n_identity.append((matching_bases / total_bases))
                 total_bases_list.append(total_bases)
 
                 if end - start > longest_alignment:
                     longest_alignment = end - start
-                    identity = matching_bases / total_bases  # reporting identity of the longest alignment
+                    #identity = matching_bases / total_bases  # reporting identity of the longest alignment
                     longest_alignment_cigar = cigar
                 longest_alignment = max(longest_alignment, end - start)
                 covered_bases.append([start, end])
@@ -188,19 +188,19 @@ def get_alignment_stats(paf_filename, ref_name, ref_length):
 
     coverage = get_covered_bases(covered_bases, ref_length)
 
-    normalized_id = sum(n_identity)/sum(total_bases_list)
+    identity = sum(n_identity)/len(n_identity)
     #print("normalized identity:")
-    #print(normalized_id)
+    #print(identity, sum(n_identity)/len(n_identity), normalized_id)
 
     return contiguity, coverage, lowest_identity, identity
 
 
-
-def parse_paf_files(df, mappings, print_csv = False):
+def parse_paf_files(df, mappings, print_csv=False):
     """
     Parses fasta, paf files references and returns info in dataframe.
     :param df: pandas DataFrame with assembly stats
     :param mappings: list of paf files
+    :param print_csv: Bool to print csv with breadth of coverage values per reference for each assembler
     :return: pandas Dataframe with columns Reference, Assembler and C90
     """
 
@@ -237,8 +237,9 @@ def parse_paf_files(df, mappings, print_csv = False):
 
             na50 = utils.get_N50(mapped_contigs)
             c90 = get_c90(mapped_contigs, len(seq)/3)  # adjust for triple reference
-
-            df_c90 = df_c90.append({'Reference': reference_name, 'Assembler': assembler, 'C90': c90}, ignore_index=True)
+            if c90 > 0:
+                df_c90 = df_c90.append({'Reference': reference_name, 'Assembler': assembler, 'C90': c90},
+                                       ignore_index=True)
 
             contiguity, coverage, lowest_identity, identity = get_alignment_stats(paf_file, header_str, len(seq)/3)
 
