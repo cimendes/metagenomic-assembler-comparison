@@ -34,13 +34,16 @@ Part of this work was adapted from
 https://raw.githubusercontent.com/rrwick/Long-read-assembler-comparison/master/scripts/assembly_stats.py
 """
 
+import random
 import sys
 from itertools import groupby
 import glob
 import os
 import re
 import fnmatch
+import math
 import pandas as pd
+from plotly import subplots
 from plotly.offline import plot
 import plotly.graph_objects as go
 
@@ -52,7 +55,18 @@ REFERENCE_SEQUENCES = os.path.join(os.path.dirname(__file__),
 
 # colors for each subplot
 colours = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c',
-          '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928']
+           '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928']
+
+
+def get_phred_quality_score(identity):
+    """
+    Using the formula -log10(1-identity)*10, receives the identity of a contig and outputs the corresponding phred
+    quality score.
+    If the identity is 1, a Phred score of 60 (error rate of 0.0001%) is returned
+    :param identity: float with identity values for the contig
+    :return: float with phred score for contig identity
+    """
+    return - math.log10(1-identity) * 10 if identity < 1 else 60
 
 
 def get_c90(alignment_lengths, ref_len):
@@ -72,6 +86,25 @@ def get_c90(alignment_lengths, ref_len):
         if length_so_far >= target_length:
             c90 += 1
     return c90
+
+
+def get_c95(alignment_lengths, ref_len):
+    """
+    Returns the number of contigs, ordered by length, that cover at least 95% of the reference sequence.
+    :param alignment_lengths: list with length of mapped contigs for the reference
+    :param ref_len: int with the expected reference length
+    :return: int with the number of contigs that represent
+    """
+    sorted_lengths = sorted(alignment_lengths, reverse=True)  # from longest to shortest
+    target_length = ref_len * 0.95
+
+    length_so_far = 0
+    c95 = 0
+    for contig_length in sorted_lengths:
+        length_so_far += contig_length
+        if length_so_far >= target_length:
+            c95 += 1
+    return c95
 
 
 def get_covered_bases(covered_bases_list, ref_len):
@@ -136,7 +169,7 @@ def get_lowest_window_identity(cigar, window_size):
     return lowest_window_id
 
 
-def get_alignment_stats(paf_filename, ref_name, ref_length):
+def get_alignment_stats(paf_filename, ref_name, ref_length, df_phred):
     """
     Function to process the mapping (*.paf) file for a given reference.
     :param paf_filename: tabular file with alignment information for an assembler
@@ -151,14 +184,11 @@ def get_alignment_stats(paf_filename, ref_name, ref_length):
 
     # Tracks the longest single alignment, in terms of the reference bases.
     longest_alignment = 0
-    identity = 0
     longest_alignment_cigar = ''
 
     covered_bases = []
     alignment_lengths = []
 
-    # TODO - See with Prof. Mario. Values don't make sense
-    # normalized identity
     total_bases_list = []
     n_identity = []
 
@@ -166,19 +196,32 @@ def get_alignment_stats(paf_filename, ref_name, ref_length):
         for line in paf:
             parts = line.strip().split('\t')
             if parts[5] == ref_name:
+                # parse values from PAF file
+                contig_name, contig_lenght = parts[0], int(parts[1])
                 start, end = int(parts[7]), int(parts[8])
                 alignment_lengths.append(end - start)
-                matching_bases, total_bases = int(parts[9]), int(parts[10])  # original col 9 / col 10
+
+                # number of residue matches, alignment block lenght
+                matching_bases, total_bases = int(parts[9]), int(parts[1])
                 total_bases_list.append(total_bases)
                 cigar = [x for x in parts if x.startswith('cg:Z:')][0][5:]
 
-                #normalized id
-                n_identity.append((matching_bases / total_bases))
+                # calculate identity per contig
+                contig_identity = matching_bases / total_bases
+                n_identity.append(contig_identity)
+
+                phred_score = get_phred_quality_score(contig_identity)
+                df_phred = df_phred.append({'Assembler': os.path.basename(paf_filename).split('.')[0].rsplit('_')[-1],
+                                            'Reference': ref_name,
+                                            'Contig': contig_name,
+                                            'Contig Length': contig_lenght,
+                                            'Phred Quality Score': phred_score
+                                            }, ignore_index=True)
+
                 total_bases_list.append(total_bases)
 
                 if end - start > longest_alignment:
                     longest_alignment = end - start
-                    #identity = matching_bases / total_bases  # reporting identity of the longest alignment
                     longest_alignment_cigar = cigar
                 longest_alignment = max(longest_alignment, end - start)
                 covered_bases.append([start, end])
@@ -188,11 +231,9 @@ def get_alignment_stats(paf_filename, ref_name, ref_length):
 
     coverage = get_covered_bases(covered_bases, ref_length)
 
-    identity = sum(n_identity)/len(n_identity)
-    #print("normalized identity:")
-    #print(identity, sum(n_identity)/len(n_identity), normalized_id)
+    identity = sum(n_identity)/len(n_identity)  # average identity
 
-    return contiguity, coverage, lowest_identity, identity
+    return contiguity, coverage, lowest_identity, identity, df_phred
 
 
 def parse_paf_files(df, mappings, print_csv=False):
@@ -204,8 +245,11 @@ def parse_paf_files(df, mappings, print_csv=False):
     :return: pandas Dataframe with columns Reference, Assembler and C90
     """
 
-    # Dataframe for plot
+    # Dataframe for C90 plot
     df_c90 = pd.DataFrame(columns=['Reference', 'Assembler', 'C90'])
+
+    # Dataframe for Phred Score plot
+    df_phred = pd.DataFrame(columns=['Assembler', 'Reference', 'Contig', 'Contig Length', 'Phred Quality Score'])
 
     for assembler in sorted(df['Assembler'].unique()):
 
@@ -220,7 +264,7 @@ def parse_paf_files(df, mappings, print_csv=False):
         paf_file = fnmatch.filter(mappings, '*_' + assembler + '.*')[0]
 
         print(','.join(["Reference", "Reference Length", "Contiguity", "Identity", "Lowest Identity",
-                        "Breadth of Coverage", "C90", "Aligned Contigs", "NA50", "Aligned Bp"]))
+                        "Breadth of Coverage", "C90", "C95", "Aligned Contigs", "NA50", "Aligned Bp"]))
 
         if print_csv:
             fh = open(assembler + "_breadth_of_coverage_contigs.csv", "w")
@@ -237,23 +281,26 @@ def parse_paf_files(df, mappings, print_csv=False):
 
             na50 = utils.get_N50(mapped_contigs)
             c90 = get_c90(mapped_contigs, len(seq)/3)  # adjust for triple reference
-            if c90 > 0:
-                df_c90 = df_c90.append({'Reference': reference_name, 'Assembler': assembler, 'C90': c90},
+            df_c90 = df_c90.append({'Reference': reference_name, 'Assembler': assembler, 'C90': c90},
                                        ignore_index=True)
+            c95 = get_c95(mapped_contigs, len(seq)/3)  # adjust for triple reference
 
-            contiguity, coverage, lowest_identity, identity = get_alignment_stats(paf_file, header_str, len(seq)/3)
+            contiguity, coverage, lowest_identity, identity, df_phred = get_alignment_stats(paf_file,
+                                                                                            header_str,
+                                                                                            len(seq)/3,
+                                                                                            df_phred)
 
             if print_csv:
                 fh.write(','.join([reference_name, str(coverage), str(len(mapped_contigs))]) + '\n')
 
-            print(','.join([reference_name, f'{len(seq)/3}', f'{contiguity:.2f}', f'{identity:.2f}',
-                            f'{lowest_identity:.2f}', f'{coverage:.2f}', f'{c90}',
+            print(','.join([reference_name, f'{len(seq)/3}', f'{contiguity:.2f}', f'{identity:.6f}',
+                            f'{lowest_identity:.6f}', f'{coverage:.2f}', f'{c90}', f'{c95}',
                             f'{len(mapped_contigs)}', f'{na50}', f'{sum(mapped_contigs)}']))
 
         if print_csv:
             fh.close()
 
-    return df_c90
+    return df_c90, df_phred
 
 
 def add_matching_ref(df, mappings):
@@ -301,24 +348,66 @@ def main():
     df = add_matching_ref(df, mappings)
 
     # Get and print mapping stats tables for each assembler
-    to_plot = parse_paf_files(df, mappings, print_csv)
+    to_plot_c90, to_plot_phred = parse_paf_files(df, mappings, print_csv)
 
     # Create plot - C90 per reference
-    fig = go.Figure()
+    fig_c90 = go.Figure()
     i = 0
-    for assembler in sorted(to_plot['Assembler'].unique()):
-        fig.add_trace(go.Scatter(x=to_plot['C90'][to_plot['Assembler'] == assembler],
-                                 y=to_plot['Reference'][to_plot['Assembler'] == assembler],
-                                 mode='markers', name=assembler,
-                                 marker=dict(color=colours[i], size=12, line=dict(width=1, color='black'))))
+    for assembler in sorted(to_plot_c90['Assembler'].unique()):
+        fig_c90.add_trace(go.Scatter(x=to_plot_c90['C90'][to_plot_c90['Assembler'] == assembler],
+                                 y=to_plot_c90['Reference'][to_plot_c90['Assembler'] == assembler],
+                                 mode='markers', name=assembler, opacity=0.7,
+                                 marker=dict(color=colours[i], size=24, line=dict(width=1, color='black'))))
         i += 1
-    fig.update_layout(title="C90 per reference genome for each assembler",
-                      xaxis_title="Contigs",
-                      plot_bgcolor='rgb(255,255,255)',
-                      xaxis=dict(showline=True, zeroline=False, linewidth=1, linecolor='black', gridcolor='#DCDCDC')
-                      )
+    fig_c90.update_layout(title="C90 per reference genome for each assembler",
+                          xaxis_title="Contigs",
+                          plot_bgcolor='rgb(255,255,255)',
+                          xaxis=dict(showline=True, zeroline=False, linewidth=1, linecolor='black', gridcolor='#DCDCDC')
+                          )
 
-    plot(fig)
+    plot(fig_c90, filename='c90.html')
+
+    # Create plot - Phred Score per contig, per reference
+    fig_phred = go.Figure()
+    i = 0
+
+    num_cols = 2
+    num_rows = int(len(to_plot_phred['Reference'].unique()) / num_cols)
+
+    # define number and organization of subplots
+    phred_subplots = subplots.make_subplots(rows=num_rows, cols=num_cols,
+                                            shared_yaxes=True, subplot_titles=to_plot_phred['Reference'].unique(),
+                                            horizontal_spacing=0.04,
+                                            vertical_spacing=0.08)
+    r, c = 1, 1
+
+    for reference in sorted(to_plot_phred['Reference'].unique()):
+        tracers = []
+        for assembler in to_plot_phred['Assembler'].unique():
+            tracer = go.Scatter(x=to_plot_phred['Phred Quality Score'][(to_plot_phred['Reference'] == reference) &
+                                                                       (to_plot_phred['Assembler'] == assembler)],
+                                y=to_plot_phred['Contig Length'][(to_plot_phred['Reference'] == reference) &
+                                                                 (to_plot_phred['Assembler'] == assembler)],
+                                name=reference,
+                                showlegend=True,
+                                opacity=0.7,
+                                mode='markers',
+                                marker=dict(color=random.choice(colours), size=12, line=dict(width=1, color='black'))
+                                )
+            i += 1
+
+            tracers.append(tracer)
+
+        for t in tracers:
+            phred_subplots.add_trace(t, r, c)
+
+        # define the next subplot that will be populated with tracer data
+        c += 1
+        if c > num_cols:
+            r += 1
+            c = 1
+
+    plot(phred_subplots, filename='phred_scatter.html', auto_open=True)
 
 
 if __name__ == '__main__':
