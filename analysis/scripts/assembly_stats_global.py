@@ -70,12 +70,11 @@ def main():
         sys.exit(0)
 
     print(','.join(['Assembler', 'Contigs', 'basepairs', 'Max contig size', 'n50', 'contigs>1000bp (%)',
-                    ' bp in contigs>1000bp (%)','n50 in contigs>1000bp']))
+                    ' bp in contigs>1000bp (%)', 'n50 in contigs>1000bp']))
 
     for assembly_file in assemblies:
 
         filename = utils.get_assember_name(assembly_file)
-
         contigs, contigs_over_1000bp = get_contig_lists(utils.fasta_iter(assembly_file))
 
         n50_contigs = utils.get_N50(contigs)
