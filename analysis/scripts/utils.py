@@ -141,3 +141,66 @@ def is_number(n):
         return True
     except ValueError:
         return False
+
+
+def parse_cs(string, min_length):
+    """
+
+    :param string:
+    :param min_length:
+    :return:
+    """
+    snps = 0
+
+    indel = []
+
+    insertion_array = []
+    insertion_count = 0
+    insertion = False
+
+    deletion_array = []
+    deletion_count = 0
+    deletion = False
+
+    for i in string:
+        # substitutions
+        if i == '*':
+            snps += 1
+            pass
+        # insertions
+        if i == '+':
+            insertion = True
+            insertion_count = 0
+            pass
+        # deletions
+        if i == '-':
+            deletion = True
+            deletion_count = 0
+            pass
+
+        # counters
+        if insertion:
+            if i in [':', '*', '\n']:
+                if insertion_count - 1 > min_length:
+                    insertion_array.append(insertion_count - 1)
+                else:
+                    indel.append('+' + str(insertion_count - 1))
+                insertion_count = 0
+                insertion = False
+            else:
+                insertion_count += 1
+
+        elif deletion:
+            if i in [':', '*', '\n']:
+                if deletion_count-1 > min_length:
+                    deletion_array.append(deletion_count - 1)
+                else:
+                    indel.append('-' + str(deletion_count - 1))
+                deletion_count = 0
+                deletion = False
+            else:
+                deletion_count += 1
+        else:
+            pass
+
+    return snps, indel, insertion_array, deletion_array

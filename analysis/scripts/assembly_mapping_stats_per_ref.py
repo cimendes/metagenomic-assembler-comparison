@@ -34,7 +34,6 @@ Part of this work was adapted from
 https://raw.githubusercontent.com/rrwick/Long-read-assembler-comparison/master/scripts/assembly_stats.py
 """
 
-import random
 import sys
 from itertools import groupby
 import glob
