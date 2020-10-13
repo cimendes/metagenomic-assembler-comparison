@@ -3,6 +3,7 @@ import os
 import fnmatch
 from itertools import groupby
 import pandas as pd
+import re
 
 COLUMNS = ['Assembler', 'Contig', 'Contig Len', 'Mapped']  # columns for dataframe
 
@@ -143,64 +144,43 @@ def is_number(n):
         return False
 
 
-def parse_cs(string, min_length):
+def parse_cs(string):
     """
 
     :param string:
     :param min_length:
     :return:
     """
-    snps = 0
-
     indel = []
 
-    insertion_array = []
-    insertion_count = 0
-    insertion = False
+    exact_matches = sum(map(int, re.findall(r':([\d]+)', string)))
 
-    deletion_array = []
-    deletion_count = 0
-    deletion = False
+    # substitutions
+    snps = len(re.findall(r'\*', string))
 
-    for i in string:
-        # substitutions
-        if i == '*':
-            snps += 1
-            pass
-        # insertions
-        if i == '+':
-            insertion = True
-            insertion_count = 0
-            pass
-        # deletions
-        if i == '-':
-            deletion = True
-            deletion_count = 0
-            pass
+    # insertions
+    insertions = re.findall(r'\+([a-z]+)', string)
+    for insertion in insertions:
+        indel.append('+' + str(len(insertion)))
 
-        # counters
-        if insertion:
-            if i in [':', '*', '\n']:
-                if insertion_count - 1 > min_length:
-                    insertion_array.append(insertion_count - 1)
-                else:
-                    indel.append('+' + str(insertion_count - 1))
-                insertion_count = 0
-                insertion = False
-            else:
-                insertion_count += 1
+    # deletion
+    deletions = re.findall(r'-([a-z]+)', string)
+    for deletion in deletions:
+        indel.append('-' + str(len(deletion)))
 
-        elif deletion:
-            if i in [':', '*', '\n']:
-                if deletion_count-1 > min_length:
-                    deletion_array.append(deletion_count - 1)
-                else:
-                    indel.append('-' + str(deletion_count - 1))
-                deletion_count = 0
-                deletion = False
-            else:
-                deletion_count += 1
-        else:
-            pass
+    return exact_matches, snps, indel
 
-    return snps, indel, insertion_array, deletion_array
+
+def adjust_reference_coord(coord, ref_len):
+    """
+
+    :param coord:
+    :param ref_len:
+    :return:
+    """
+    if coord <= ref_len:
+        return coord
+    elif coord <= 2 * ref_len:
+        return coord - ref_len
+    else:
+        return coord - (2 * ref_len)

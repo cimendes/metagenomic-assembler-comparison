@@ -48,52 +48,83 @@ REFERENCE_SEQUENCES = os.path.join(os.path.dirname(__file__),
                                    '..', '..', 'data', 'references', 'Zymos_Genomes_triple_chromosomes.fasta')
 
 
-def add_matching_ref(df, mappings):
+def check_missassemblies(mappings):
     """
-    For each contig in the df, adds the correspondent reference if the contig is mapped. Drops the unmapped contigs.
     :param df: Pandas Dataframe with stats for each contig
     :param mappings: list of paf files
-    :return: Pandas Dataframe with stats for each contig with reference info instead of 'Mapped' and rows with
-    unmapped contigs removed
+    :return: dictionary
     """
-    #paf_dict = {'Assembler': {'Contig': '', 'Data': [{}]}}
 
-    for assembler in sorted(df['Assembler'].unique()):
-        paf_file = fnmatch.filter(mappings, '*_' + assembler + '.*')[0]
-        #paf_dict['Assembler'] = assembler
+    missmatch_dict = {}
+
+    for paf_file in mappings:
+        assembler = utils.get_assember_name(paf_file)
+
         with open(paf_file, 'r') as paf_fh:
             for line in paf_fh:
                 line = line.split()
-                if int(line[11]) == 0:
-                    if line[1] != line[9]:  # number of residue matches
-                        cigar = line[-1]
-                        snp, indel, insertions, deletions = utils.parse_cs(cigar, 50)
-                        print(cigar)
-                        print('SNP: {}'.format(snp))
-                        print('InDel: {}'.format(indel))
-                        print('Insertions: {}'.format(len(insertions)))
-                        print('Deletions: {}'.format(len(deletions)))
+
+                contig, contig_len, query_start, query_end, strand = line[0:5]
+                reference, reference_len, target_start, target_end = line[5:9]
+
+                # a non-perfect alignment or a different number of residue matches
+                if int(line[11]) != 0 or line[1] != line[9]:
+
+                    cigar = line[-1]
+                    exact_matches, snp, indel = utils.parse_cs(cigar)  # TODO - gap size to be adjusted by param
+
+                    contig_dict = {'contig length': contig_len,
+                                   'query start': int(query_start),
+                                   'query end': int(query_end),
+                                   'reference': reference,
+                                   'reference length': int(reference_len)/3,
+                                   'target start': utils.adjust_reference_coord(int(target_start),
+                                                                                int(reference_len)/3),
+                                   'target end': utils.adjust_reference_coord(int(target_end),
+                                                                              int(reference_len)/3),
+                                   'exact matches': exact_matches,
+                                   'snp': snp,
+                                   'indels': indel}
+
+                    if assembler not in missmatch_dict.keys():
+                        missmatch_dict[assembler] = {contig: [contig_dict]}
+                    else:
+                        if contig in missmatch_dict[assembler].keys():
+                            missmatch_dict[assembler][contig].append(contig_dict)
+                        else:
+                            missmatch_dict[assembler][contig] = [contig_dict]
+
+    return missmatch_dict
+
+
+def evaluate_misassembled_contigs(dict):
+    for assembler in dict.keys():
+        for contig in dict[assembler].keys():
+            if len(dict[assembler][contig]) > 1:  # why is contig 1 here?
+                num_alignment_blocks = len(dict[assembler][contig])
+                print(num_alignment_blocks)
+                aligned_bases = 0
+                contig_len = dict[assembler][contig][0]['contig length']
+                reference = set()
+                for alignment_block in dict[assembler][contig]:
+                    print(alignment_block)
+                    aligned_bases += (alignment_block['query end'] - alignment_block['query start'])
+
+
+
 
 def main():
     try:
-        assemblies = [sys.argv[1]]  # changed!
-        mappings = [sys.argv[2]]
+        mappings = [sys.argv[1]]  # TODO - to change
 
     except IndexError as e:
         print(e, "files not found")
         sys.exit(0)
 
-    try:
-        if sys.argv[3] == "--print-csv":
-            print_csv = True
-    except IndexError as e:
-        print_csv = False
-
-    # Dataframe with assembly info
-    df = utils.parse_assemblies(assemblies, mappings)
-
     # Add correspondent reference to each dataframe contig
-    df = add_matching_ref(df, mappings)
+    misassembled_contigs = check_missassemblies(mappings)
+    evaluate_misassembled_contigs(misassembled_contigs)
+
 
 if __name__ == '__main__':
     main()
