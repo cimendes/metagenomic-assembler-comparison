@@ -28,24 +28,11 @@ Inês Mendes, cimendes@medicina.ulisboa.pt
 https://github.com/cimendes
 """
 
-import random
 import sys
-from itertools import groupby
-import glob
-import os
-import re
-import fnmatch
 import math
-import pandas as pd
-from plotly import subplots
-from plotly.offline import plot
-import plotly.graph_objects as go
 
 #import commonly used functions from utils.py
 import utils
-
-REFERENCE_SEQUENCES = os.path.join(os.path.dirname(__file__),
-                                   '..', '..', 'data', 'references', 'Zymos_Genomes_triple_chromosomes.fasta')
 
 
 def check_missassemblies(mappings):
@@ -76,6 +63,7 @@ def check_missassemblies(mappings):
                     contig_dict = {'contig length': contig_len,
                                    'query start': int(query_start),
                                    'query end': int(query_end),
+                                   'strand': strand,
                                    'reference': reference,
                                    'reference length': int(reference_len)/3,
                                    'target start': utils.adjust_reference_coord(int(target_start),
@@ -97,20 +85,40 @@ def check_missassemblies(mappings):
     return missmatch_dict
 
 
-def evaluate_misassembled_contigs(dict):
-    for assembler in dict.keys():
-        for contig in dict[assembler].keys():
-            if len(dict[assembler][contig]) > 1:  # why is contig 1 here?
-                num_alignment_blocks = len(dict[assembler][contig])
-                print(num_alignment_blocks)
+def evaluate_misassembled_contigs(mis_dict):
+    for assembler in mis_dict.keys():
+        for contig in mis_dict[assembler].keys():
+            if len(mis_dict[assembler][contig]) > 1:
+                print(contig)
+                num_alignment_blocks = len(mis_dict[assembler][contig])
                 aligned_bases = 0
-                contig_len = dict[assembler][contig][0]['contig length']
+                contig_len = int(mis_dict[assembler][contig][0]['contig length'])
                 reference = set()
-                for alignment_block in dict[assembler][contig]:
+                strands = set()
+                blocks_to_order = []
+                for alignment_block in mis_dict[assembler][contig]:
                     print(alignment_block)
                     aligned_bases += (alignment_block['query end'] - alignment_block['query start'])
+                    reference.add(alignment_block['reference'])
+                    strands.add(alignment_block['strand'])
+                    blocks_to_order.append(alignment_block['query start'])
+                    # get order
+                if not math.isclose(aligned_bases, contig_len, rel_tol=50):  # TODO - Hardcoded!
+                    print("has gaps")
+                if len(reference) > 1:
+                    print("Difference references!")
+                if len(strands) > 1:
+                    print("Different strands!")
+                # get order of blocks
+                blocks_ordered = sorted(blocks_to_order)
+                order = []
+                for item in blocks_to_order:
+                    order.append(blocks_ordered.index(item))
+                print(order)
 
-
+                ##### CHECK ORDER OF ASSEMBLY BLOCKS! FROM ORDER; EVALUATE TYPE OF MISASSEMBLY
+                #### CHECK STRANDS OF ASSEMBLY BLOCKS
+                ### GENETARE DUMMY TEST DATA
 
 
 def main():
