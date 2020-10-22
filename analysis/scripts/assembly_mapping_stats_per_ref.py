@@ -201,7 +201,7 @@ def get_alignment_stats(paf_filename, ref_name, ref_length, df_phred):
 
                 # number of residue matches, alignment block length
                 matching_bases, total_bases = int(parts[9]), int(parts[10])  # TODO
-                cigar = [x for x in parts if x.startswith('cg:Z:')][0][5:]
+                cigar = parts[-1]
 
                 if contig_name not in aligment_dict['Contigs'].keys():
                     aligment_dict['Contigs'][contig_name] = {'Length': contig_length, 'Base_Matches': matching_bases,
