@@ -3,7 +3,8 @@ MAINTAINER Inês Mendes <cimendes@medicina.ulisboa.pt>
 
 RUN  apt-get update && apt-get -y install \
     wget \
-    lbzip2
+    lbzip2 \
+    python3.8
 
 WORKDIR /NGStools
 
