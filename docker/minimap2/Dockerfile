@@ -6,7 +6,7 @@ RUN  apt-get update && apt-get -y install \
     lbzip2 \
     python3
 
-RUN pip3 install pandas
+RUN pip install pandas
 
 WORKDIR /NGStools
 
