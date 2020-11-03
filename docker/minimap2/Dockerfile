@@ -6,6 +6,8 @@ RUN  apt-get update && apt-get -y install \
     lbzip2 \
     python3
 
+RUN pip3 install pandas
+
 WORKDIR /NGStools
 
 RUN wget https://github.com/lh3/minimap2/releases/download/v2.17/minimap2-2.17_x64-linux.tar.bz2 && \
