@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM cimendes/lmas-python-base:0.1
 MAINTAINER Inês Mendes <cimendes@medicina.ulisboa.pt>
 
 RUN  apt-get update && apt-get -y install \
